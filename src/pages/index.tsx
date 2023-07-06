@@ -10,6 +10,7 @@ const getHelloApi = async (): Promise<any> => {
 
 export default function Home(): ReactElement {
   const [helloMessage, setHelloMessage] = useState();
+  const [logMessage, setLogMessage] = useState();
 
   useEffect((): void => {
     const fetch = async (): Promise<any> => {
@@ -23,6 +24,18 @@ export default function Home(): ReactElement {
 
     fetch();
   }, []);
+
+  const logToServer = async (): Promise<any> => {
+    const response = await fetch("/api/log");
+    return await response.json();
+  };
+
+  const handleLogToServer = async () => {
+    const logData = await logToServer();
+    if (logData.status) {
+      setLogMessage(logData.logMessage);
+    }
+  };
 
   return (
     <main className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}>
@@ -65,6 +78,15 @@ export default function Home(): ReactElement {
       <code className='font-mono font-bold'>
         Test API: Get Hello Message From Api: [{helloMessage}]
       </code>
+
+      <button
+        onClick={() => handleLogToServer()}
+        className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
+      >
+        Log Anything On Server
+      </button>
+
+      {logMessage ?? ""}
 
       <div className='mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left'>
         <a
