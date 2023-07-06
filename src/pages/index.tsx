@@ -62,7 +62,9 @@ export default function Home(): ReactElement {
         />
       </div>
 
-      <code className='font-mono font-bold'>Get Hello Message From Api: [{helloMessage}]</code>
+      <code className='font-mono font-bold'>
+        Test API: Get Hello Message From Api: [{helloMessage}]
+      </code>
 
       <div className='mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left'>
         <a
