@@ -13,8 +13,11 @@ functions:
   api:
     handler: server.handler
     events:
-      - http: ANY /
-      - http: ANY /{proxy+}
+      # Using Amazon Aws Api Gateway v2 (HTTP API)
+      - httpApi: "*"
+      # Using Amazon Aws Api Gateway v1 (REST API - with stage name in url)
+      # - http: ANY /
+      # - http: ANY /{proxy+}
 
 plugins:
   - serverless-esbuild
