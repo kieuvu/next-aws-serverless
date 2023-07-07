@@ -9,6 +9,7 @@ provider:
   environment:
     APP_ENV: ${sls:stage}
     AWS_BUCKET: !Ref Storage
+    AWS_SQS_URL: ${construct:jobs.queueUrl}
 
   apiGateway:
     shouldStartNameWithService: true
@@ -33,6 +34,7 @@ functions:
 plugins:
   - serverless-esbuild
   - serverless-dotenv-plugin
+  - serverless-lift
 
 package:
   individually: true
@@ -56,7 +58,15 @@ custom:
     exclude:
       - APP_ENV
       - AWS_BUCKET
+      - AWS_SQS_URL
+      - AWS_DEFAULT_REGION
     required:
       env:
         - AMAZON_AWS_ACCESS_KEY_ID
         - AMAZON_AWS_ACCESS_KEY_SECRET
+
+constructs:
+  jobs:
+    type: queue
+    worker:
+      handler: server.handler
