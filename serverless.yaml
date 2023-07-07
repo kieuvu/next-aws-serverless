@@ -1,5 +1,7 @@
 service: serverless-next
 
+useDotenv: true
+
 provider:
   name: aws
   runtime: nodejs16.x
@@ -7,6 +9,7 @@ provider:
   environment:
     APP_ENV: ${sls:stage}
     AWS_BUCKET: !Ref Storage
+
   apiGateway:
     shouldStartNameWithService: true
     binaryMediaTypes:
@@ -29,6 +32,7 @@ functions:
 
 plugins:
   - serverless-esbuild
+  - serverless-dotenv-plugin
 
 package:
   individually: true
@@ -48,3 +52,11 @@ custom:
     exclude: "*"
     external:
       - "next"
+  dotenv:
+    exclude:
+      - APP_ENV
+      - AWS_BUCKET
+    required:
+      env:
+        - AMAZON_AWS_ACCESS_KEY_ID
+        - AMAZON_AWS_ACCESS_KEY_SECRET
