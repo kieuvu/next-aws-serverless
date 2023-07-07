@@ -1,39 +1,8 @@
 import Image from "next/image";
-import { ReactElement, useEffect, useState } from "react";
-
-const getHelloApi = async (): Promise<any> => {
-  return await fetch("/api/hello");
-};
+import Link from "next/link";
+import { ReactElement } from "react";
 
 export default function Home(): ReactElement {
-  const [helloMessage, setHelloMessage] = useState();
-  const [logMessage, setLogMessage] = useState();
-
-  useEffect((): void => {
-    const fetch = async (): Promise<any> => {
-      const response = await getHelloApi();
-      const data = await response.json();
-
-      if (data.message) {
-        setHelloMessage(data.message);
-      }
-    };
-
-    fetch();
-  }, []);
-
-  const logToServer = async (): Promise<any> => {
-    const response = await fetch("/api/log");
-    return await response.json();
-  };
-
-  const handleLogToServer = async () => {
-    const logData = await logToServer();
-    if (logData.status) {
-      setLogMessage(logData.logMessage);
-    }
-  };
-
   return (
     <main className={`flex min-h-screen flex-col items-center justify-between p-24`}>
       <div className='z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex'>
@@ -72,18 +41,9 @@ export default function Home(): ReactElement {
         />
       </div>
 
-      <code className='font-mono font-bold'>
-        Test API: Get Hello Message From Api: [{helloMessage}]
-      </code>
-
-      <button
-        onClick={() => handleLogToServer()}
-        className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
-      >
-        Log Anything On Server
+      <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
+        <Link href='/about'>Go To Feature Page</Link>
       </button>
-
-      {logMessage ?? ""}
 
       <div className='mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left'>
         <a
