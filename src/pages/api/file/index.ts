@@ -4,10 +4,12 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const s3 = new S3({
+    accessKeyId: process.env.AMAZON_AWS_ACCESS_KEY_ID as string,
+    secretAccessKey: process.env.AMAZON_AWS_ACCESS_KEY_SECRET as string,
     apiVersion: "2006-03-01",
   });
 
-  const { fileName, fileType } = req.query;
+  const { fileType } = req.query;
 
   const post = s3.createPresignedPost({
     Bucket: process.env.AWS_BUCKET,
