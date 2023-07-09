@@ -20,6 +20,10 @@ resources:
   Resources:
     Storage:
       Type: AWS::S3::Bucket
+    AssetsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: next-static-site-assets
 
 functions:
   api:
@@ -35,6 +39,7 @@ plugins:
   - serverless-esbuild
   - serverless-dotenv-plugin
   - serverless-lift
+  - serverless-s3-sync
 
 package:
   individually: true
@@ -48,6 +53,11 @@ package:
     - "package.json"
 
 custom:
+  s3Sync:
+    - bucketName: next-static-site-assets
+      localDir: .next/static
+      bucketPrefix: _next/static/
+
   esbuild:
     bundle: true
     minify: true
@@ -59,11 +69,11 @@ custom:
       - APP_ENV
       - AWS_BUCKET
       - AWS_SQS_URL
-      - AWS_DEFAULT_REGION
     required:
       env:
         - AMAZON_AWS_ACCESS_KEY_ID
         - AMAZON_AWS_ACCESS_KEY_SECRET
+        - AMAZON_AWS_DEFAULT_REGION
 
 constructs:
   jobs:
