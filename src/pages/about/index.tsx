@@ -11,6 +11,20 @@ const getHelloApi = async (): Promise<any> => {
   return await fetch("/api/hello");
 };
 
+const dispatchQueue = async () => {
+  await fetch("api/queue", {
+    method: "POST",
+    body: JSON.stringify({
+      to: "recipient@example.com",
+      subject: "Hello",
+      body: "This is the email body.",
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+};
+
 export default function About(): ReactElement {
   const [helloMessage, setHelloMessage] = useState();
   const [logMessage, setLogMessage] = useState();
@@ -58,6 +72,13 @@ export default function About(): ReactElement {
       </button>
 
       {uploadFileToggle ? <ImageUpload /> : <></>}
+
+      <button
+        onClick={() => dispatchQueue()}
+        className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
+      >
+        Dispatch Queue
+      </button>
 
       <button className=' my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
         <Link href='/'>Back To Home</Link>
