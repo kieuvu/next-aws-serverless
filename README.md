@@ -1,4 +1,4 @@
-# Laravel-serverless
+# NextJS-serverless
 
 ## Stack
 
