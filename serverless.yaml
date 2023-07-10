@@ -10,11 +10,23 @@ provider:
     APP_ENV: ${sls:stage}
     AWS_BUCKET: !Ref Storage
     AWS_SQS_URL: ${construct:jobs.queueUrl}
+    USER_POOL: !Ref UserPool
+    USER_POOL_CLIENT: !Ref UserClient
 
   apiGateway:
     shouldStartNameWithService: true
     binaryMediaTypes:
       - "*/*"
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - cognito-idp:AdminInitiateAuth
+            - cognito-idp:AdminCreateUser
+            - cognito-idp:AdminSetUserPassword
+          Resource: "*"
 
 resources:
   Resources:
@@ -24,6 +36,28 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: next-static-site-assets
+    UserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: ${self:service}-pool-${sls:stage}
+        Schema:
+          - Name: email
+            Required: true
+            Mutable: true
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 6
+        AutoVerifiedAttributes: ["email"]
+    UserClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: ${self:service}-client-${sls:stage}
+        GenerateSecret: false
+        UserPoolId: !Ref UserPool
+        AccessTokenValidity: 5
+        IdTokenValidity: 5
+        ExplicitAuthFlows:
+          - "ADMIN_NO_SRP_AUTH"
 
 functions:
   api:
@@ -69,6 +103,8 @@ custom:
       - APP_ENV
       - AWS_BUCKET
       - AWS_SQS_URL
+      - USER_POOL
+      - USER_POOL_CLIENT
     required:
       env:
         - AMAZON_AWS_ACCESS_KEY_ID
