@@ -26,9 +26,9 @@ const dispatchQueue = async () => {
 };
 
 export default function About(): ReactElement {
-  const [helloMessage, setHelloMessage] = useState();
-  const [logMessage, setLogMessage] = useState();
-  const [uploadFileToggle, setUploadFileToggle] = useState(false);
+  const [helloMessage, setHelloMessage] = useState<string>("");
+  const [logMessage, setLogMessage] = useState<string>("");
+  const [uploadFileToggle, setUploadFileToggle] = useState<boolean>(false);
 
   useEffect((): void => {
     const fetch = async (): Promise<void> => {
