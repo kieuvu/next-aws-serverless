@@ -79,4 +79,16 @@ constructs:
   jobs:
     type: queue
     worker:
-      handler: server.handler
+      handler: server.queueReceiver
+    fifo: true
+    ### The maxRetries option configures how many times each message will be retried in case of failure.
+    ### maxRetries default: 3
+    # maxRetries: 5
+    ### Lambda will receive 5 messages at a time
+    ### Batch size between 1 and 10 for FIFO queues and 10000 for standard queues.
+    ### For batch size over 10, maxBatchingWindow must be set.
+    ### batchSize default: 1
+    # batchSize: 5
+    ### SQS will wait $$ seconds (so that it can batch any messages together) before delivering to lambda
+    ### maxBatchingWindow default: 0 second
+    # maxBatchingWindow: 5
