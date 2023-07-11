@@ -16,7 +16,7 @@ const uploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
   const fileName = encodeURIComponent(file.name);
   const fileType = encodeURIComponent(file.type);
 
-  const res = await fetch(`/api/file?fileName=${fileName}&fileType=${fileType}`);
+  const res = await fetch(`/api/createS3Presigned?fileName=${fileName}&fileType=${fileType}`);
 
   const { url, fields } = await res.json();
   const formData = new FormData();

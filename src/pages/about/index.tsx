@@ -12,7 +12,7 @@ const getHelloApi = async (): Promise<any> => {
 };
 
 const dispatchQueue = async () => {
-  await fetch("api/queue", {
+  await fetch("api/queueSender", {
     method: "POST",
     body: JSON.stringify({
       to: "recipient@example.com",
