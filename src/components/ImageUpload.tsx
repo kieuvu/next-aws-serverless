@@ -1,11 +1,12 @@
 import FetchService from "@/services/FetchService";
+import { ReactElement } from "react";
 
-export default function ImageUpload() {
+export default function ImageUpload(): ReactElement {
   return (
     <>
       <p>Upload a .png or .jpg image (max 1MB).</p>
       <input
-        onChange={uploadPhoto}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>): Promise<any> => uploadPhoto(e)}
         type='file'
         accept='image/png, image/jpeg'
       />
@@ -13,12 +14,12 @@ export default function ImageUpload() {
   );
 }
 
-const uploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0]!;
-  const fileName = encodeURIComponent(file.name);
-  const fileType = encodeURIComponent(file.type);
+const uploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>): Promise<any> => {
+  const file: File = e.target.files?.[0]!;
+  const fileName: string = encodeURIComponent(file.name);
+  const fileType: string = encodeURIComponent(file.type);
 
-  const res = await new FetchService()
+  const res: any = await new FetchService()
     .setURL("/api/createS3Presigned")
     .withBearerAuthorization()
     .setData({
@@ -28,7 +29,7 @@ const uploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     .fetch();
 
   const { url, fields } = await res;
-  const formData = new FormData();
+  const formData: FormData = new FormData();
 
   Object.entries({ ...fields, file }).forEach(([key, value]) => {
     formData.append(key, value as string);

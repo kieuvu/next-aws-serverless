@@ -39,14 +39,14 @@ export default class FetchService {
   }
 
   public withBearerAuthorization(): this {
-    const credentials = JSON.parse(localStorage.getItem("credentials") as string);
-    const accessToken = credentials.AccessToken;
-    const token = `Bearer ${accessToken}`;
+    const credentials: any = JSON.parse(localStorage.getItem("credentials") as string);
+    const accessToken: string = credentials.AccessToken;
+    const token: string = `Bearer ${accessToken}`;
     return this.setHeader("Authorization", token);
   }
 
   public async fetch(): Promise<any> {
-    let urlTemp = this.url;
+    let urlTemp: string = this.url;
 
     const options: any = {
       method: this.method,
@@ -54,7 +54,7 @@ export default class FetchService {
     };
 
     if (this.method === "GET") {
-      const params = new URLSearchParams(this.data).toString();
+      const params: string = new URLSearchParams(this.data).toString();
       urlTemp += "?" + params;
     }
 
@@ -62,7 +62,7 @@ export default class FetchService {
       options.body = this.isFormData ? this.data : JSON.stringify(this.data);
     }
 
-    const request = await fetch(urlTemp, options);
+    const request: any = await fetch(urlTemp, options);
 
     try {
       return await request.json();

@@ -11,7 +11,7 @@ const getHelloApi = async (): Promise<any> => {
   return await new FetchService().setURL("/api/hello").withBearerAuthorization().fetch();
 };
 
-const dispatchQueue = async () => {
+const dispatchQueue = async (): Promise<any> => {
   await new FetchService()
     .isPostRequest()
     .setURL("api/queueSender")
@@ -27,21 +27,16 @@ export default function About(): ReactElement {
 
   useEffect((): void => {
     const fetch = async (): Promise<void> => {
-      const response = await getHelloApi();
-
-      if (response.message) {
-        setHelloMessage(response.message);
-      }
+      const response: any = await getHelloApi();
+      if (response?.message) setHelloMessage(response.message);
     };
 
     fetch();
   }, []);
 
   const handleLogToServer = async (): Promise<void> => {
-    const logData = await logToServer();
-    if (logData.status) {
-      setLogMessage(logData.logMessage);
-    }
+    const logData: any = await logToServer();
+    if (logData?.status) setLogMessage(logData.logMessage);
   };
 
   return (
@@ -59,7 +54,7 @@ export default function About(): ReactElement {
       </button>
 
       <button
-        onClick={() => setUploadFileToggle(!uploadFileToggle)}
+        onClick={(): void => setUploadFileToggle(!uploadFileToggle)}
         className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
       >
         Upload File To S3
@@ -68,7 +63,7 @@ export default function About(): ReactElement {
       {uploadFileToggle ? <ImageUpload /> : <></>}
 
       <button
-        onClick={() => dispatchQueue()}
+        onClick={(): Promise<any> => dispatchQueue()}
         className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
       >
         Dispatch Queue
