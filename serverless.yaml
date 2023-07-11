@@ -12,7 +12,12 @@ provider:
     AWS_SQS_URL: ${construct:jobs.queueUrl}
     USER_POOL: !Ref UserPool
     USER_POOL_CLIENT: !Ref UserClient
-
+  httpApi:
+    authorizers:
+      userAuthorization:
+        identitySource: $request.header.Authorization
+        issuerUrl: { "Fn::Join": ["", ["https://cognito-idp.us-east-1.amazonaws.com/", !Ref UserPool]] }
+        audience: !Ref UserClient
   apiGateway:
     shouldStartNameWithService: true
     binaryMediaTypes:
@@ -60,14 +65,51 @@ resources:
           - "ADMIN_NO_SRP_AUTH"
 
 functions:
-  api:
+  # Using Amazon Aws Api Gateway v2 (HTTP API)
+  # - httpApi: "*"
+  # Using Amazon Aws Api Gateway v1 (REST API - with stage name in url)
+  # - http: ANY /
+  # - http: ANY /{proxy+}
+  static-page:
     handler: server.handler
     events:
-      # Using Amazon Aws Api Gateway v2 (HTTP API)
       - httpApi: "*"
-      # Using Amazon Aws Api Gateway v1 (REST API - with stage name in url)
-      # - http: ANY /
-      # - http: ANY /{proxy+}
+  hello:
+    handler: functions/apis/hello/hello.handler
+    events:
+      - httpApi:
+          method: GET
+          path: /api/hello
+  log:
+    handler: functions/apis/log/log.handler
+    events:
+      - httpApi:
+          method: GET
+          path: /api/log
+  createS3Presigned:
+    handler: functions/apis/s3/createS3Presigned.handler
+    events:
+      - httpApi:
+          method: GET
+          path: /api/createS3Presigned
+  queueSender:
+    handler: functions/apis/queue/queueSender.handler
+    events:
+      - httpApi:
+          method: POST
+          path: /api/queueSender
+  login:
+    handler: functions/apis/auth/login.handler
+    events:
+      - httpApi:
+          method: POST
+          path: /api/auth/login
+  register:
+    handler: functions/apis/auth/register.handler
+    events:
+      - httpApi:
+          method: POST
+          path: /api/auth/register
 
 plugins:
   - serverless-esbuild
@@ -115,7 +157,7 @@ constructs:
   jobs:
     type: queue
     worker:
-      handler: server.queueReceiver
+      handler: functions/apis/queue/queueWorker.handler
     # fifo: false
     ### The maxRetries option configures how many times each message will be retried in case of failure.
     ### maxRetries default: 3
