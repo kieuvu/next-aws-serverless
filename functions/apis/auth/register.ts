@@ -13,7 +13,7 @@ export const handler = async (event: any) => {
     });
   }
 
-  return createResponse(400, {
+  return createResponse(200, {
     status: true,
   });
 };
