@@ -1,28 +1,23 @@
 import ImageUpload from "@/components/ImageUpload";
+import FetchService from "@/services/FetchService";
 import Link from "next/link";
 import { ReactElement, useEffect, useState } from "react";
 
 const logToServer = async (): Promise<any> => {
-  const response = await fetch("/api/log");
-  return await response.json();
+  return await new FetchService().setURL("/api/log").withBearerAuthorization().fetch();
 };
 
 const getHelloApi = async (): Promise<any> => {
-  return await fetch("/api/hello");
+  return await new FetchService().setURL("/api/hello").withBearerAuthorization().fetch();
 };
 
 const dispatchQueue = async () => {
-  await fetch("api/queueSender", {
-    method: "POST",
-    body: JSON.stringify({
-      to: "recipient@example.com",
-      subject: "Hello",
-      body: "This is the email body.",
-    }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  await new FetchService()
+    .isPostRequest()
+    .setURL("api/queueSender")
+    .setHeader("Content-Type", "application/json")
+    .withBearerAuthorization()
+    .fetch();
 };
 
 export default function About(): ReactElement {
@@ -33,10 +28,9 @@ export default function About(): ReactElement {
   useEffect((): void => {
     const fetch = async (): Promise<void> => {
       const response = await getHelloApi();
-      const data = await response.json();
 
-      if (data.message) {
-        setHelloMessage(data.message);
+      if (response.message) {
+        setHelloMessage(response.message);
       }
     };
 

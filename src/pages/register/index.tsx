@@ -1,3 +1,4 @@
+import FetchService from "@/services/FetchService";
 import { ReactElement, useState } from "react";
 
 export default function Register(): ReactElement {
@@ -9,15 +10,14 @@ export default function Register(): ReactElement {
       alert("Fill out all fields");
     }
 
-    const request = await fetch("/api/auth/register", {
-      method: "POST",
-      body: JSON.stringify({
+    const response = await new FetchService()
+      .isPostRequest()
+      .setURL("/api/auth/register")
+      .setData({
         email,
         password,
-      }),
-    });
-
-    const response = await request.json();
+      })
+      .fetch();
 
     console.log("Submitted", response);
   };

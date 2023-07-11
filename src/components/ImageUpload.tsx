@@ -1,3 +1,5 @@
+import FetchService from "@/services/FetchService";
+
 export default function ImageUpload() {
   return (
     <>
@@ -16,19 +18,28 @@ const uploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
   const fileName = encodeURIComponent(file.name);
   const fileType = encodeURIComponent(file.type);
 
-  const res = await fetch(`/api/createS3Presigned?fileName=${fileName}&fileType=${fileType}`);
+  const res = await new FetchService()
+    .setURL("/api/createS3Presigned")
+    .withBearerAuthorization()
+    .setData({
+      fileName,
+      fileType,
+    })
+    .fetch();
 
-  const { url, fields } = await res.json();
+  const { url, fields } = await res;
   const formData = new FormData();
 
   Object.entries({ ...fields, file }).forEach(([key, value]) => {
     formData.append(key, value as string);
   });
 
-  const upload = await fetch(url, {
-    method: "POST",
-    body: formData,
-  });
+  const upload = await new FetchService()
+    .isPostRequest()
+    .withBearerAuthorization()
+    .setURL(url)
+    .setData(formData)
+    .fetch();
 
   if (upload.ok) {
     console.log("Uploaded successfully!");

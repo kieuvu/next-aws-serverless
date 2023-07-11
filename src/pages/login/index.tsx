@@ -1,25 +1,32 @@
 import { ReactElement, useState } from "react";
+import { useRouter } from "next/router";
+import FetchService from "@/services/FetchService";
 
 export default function Login(): ReactElement {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+
+  const router = useRouter();
 
   const onSubmit = async (): Promise<void> => {
     if (!email.trim() || !password.trim()) {
       alert("Fill out all fields");
     }
 
-    const request = await fetch("/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify({
+    const response = await new FetchService()
+      .isPostRequest()
+      .setURL("/api/auth/login")
+      .setData({
         email,
         password,
-      }),
-    });
+      })
+      .fetch();
 
-    const response = await request.json();
-
-    console.log("Submitted", response);
+    if (response.status) {
+      localStorage.setItem("credentials", JSON.stringify(response.credentials.token));
+      console.log("Login Success", response);
+      router.push("/about");
+    }
   };
 
   return (
