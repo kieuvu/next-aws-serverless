@@ -3,6 +3,7 @@ export default class FetchService {
   private method: string = "GET";
   private url: string = "";
   private data: any = {};
+  private isFormData: boolean = false;
 
   public setHeader(header: string, value: any): this {
     this.headers[header] = value;
@@ -16,6 +17,11 @@ export default class FetchService {
 
   public isPostRequest(): this {
     return this.setMethod("POST");
+  }
+
+  public setFormData(data: any): this {
+    this.isFormData = true;
+    return this.setData(data);
   }
 
   public isGetMethod(): this {
@@ -53,11 +59,15 @@ export default class FetchService {
     }
 
     if (this.method === "POST") {
-      options.body = JSON.stringify(this.data);
+      options.body = this.isFormData ? this.data : JSON.stringify(this.data);
     }
 
     const request = await fetch(urlTemp, options);
 
-    return await request.json();
+    try {
+      return await request.json();
+    } catch (error) {
+      console.log("Empty Response");
+    }
   }
 }
