@@ -34,16 +34,5 @@ const uploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     formData.append(key, value as string);
   });
 
-  const upload = await new FetchService()
-    .isPostRequest()
-    .withBearerAuthorization()
-    .setURL(url)
-    .setData(formData)
-    .fetch();
-
-  if (upload.ok) {
-    console.log("Uploaded successfully!");
-  } else {
-    console.error("Upload failed.");
-  }
+  return await new FetchService().isPostRequest().setURL(url).setFormData(formData).fetch();
 };
