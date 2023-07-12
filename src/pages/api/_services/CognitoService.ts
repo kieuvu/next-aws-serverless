@@ -1,16 +1,42 @@
 import AWS, { CognitoIdentityServiceProvider } from "aws-sdk";
 
 export default class CognitoService {
+  private static userPool: string = process.env.USER_POOL as string;
+  private static userPoolClient: string = process.env.USER_POOL_CLIENT as string;
+  private static region: string = process.env.AMAZON_AWS_DEFAULT_REGION as string;
+
   private static getCognitoInstance(): CognitoIdentityServiceProvider {
     return new AWS.CognitoIdentityServiceProvider({
-      region: process.env.AMAZON_AWS_DEFAULT_REGION as string,
+      region: CognitoService.region,
     });
   }
 
   public static async getUser(token: string) {
     try {
-      const user = await CognitoService.getCognitoInstance().getUser({ AccessToken: token }).promise();
-      return user;
+      const user: any = await CognitoService.getCognitoInstance()
+        .getUser({ AccessToken: token })
+        .promise();
+      return user ?? null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  public static async refreshToken(refreshToken: string) {
+    const params = {
+      AuthFlow: "REFRESH_TOKEN",
+      ClientId: CognitoService.userPoolClient,
+      UserPoolId: CognitoService.userPool,
+      AuthParameters: {
+        REFRESH_TOKEN: refreshToken,
+      },
+    };
+
+    const cognito: CognitoIdentityServiceProvider = CognitoService.getCognitoInstance();
+
+    try {
+      const response: any = await cognito.adminInitiateAuth(params).promise();
+      return response?.AuthenticationResult ?? null;
     } catch (_) {
       return null;
     }
@@ -19,11 +45,10 @@ export default class CognitoService {
   public static async register(email: string, password: string): Promise<any> {
     try {
       const cognito: CognitoIdentityServiceProvider = CognitoService.getCognitoInstance();
-      const userPool: string = process.env.USER_POOL as string;
 
       const result = await cognito
         .adminCreateUser({
-          UserPoolId: userPool,
+          UserPoolId: CognitoService.userPool,
           Username: email,
           UserAttributes: [
             {
@@ -43,7 +68,7 @@ export default class CognitoService {
         await cognito
           .adminSetUserPassword({
             Password: password,
-            UserPoolId: userPool,
+            UserPoolId: CognitoService.userPool,
             Username: email,
             Permanent: true,
           })
@@ -60,14 +85,12 @@ export default class CognitoService {
   public static async login(email: string, password: string): Promise<any> {
     try {
       const cognito: CognitoIdentityServiceProvider = CognitoService.getCognitoInstance();
-      const userPool: string = process.env.USER_POOL as string;
-      const userPoolClient: string = process.env.USER_POOL_CLIENT as string;
 
       const response = await cognito
         .adminInitiateAuth({
           AuthFlow: "ADMIN_NO_SRP_AUTH",
-          UserPoolId: userPool,
-          ClientId: userPoolClient,
+          UserPoolId: CognitoService.userPool,
+          ClientId: CognitoService.userPoolClient,
           AuthParameters: {
             USERNAME: email,
             PASSWORD: password,
