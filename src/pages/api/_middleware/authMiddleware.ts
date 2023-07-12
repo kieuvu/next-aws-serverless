@@ -15,16 +15,15 @@ export const AuthMiddleware = (handler: any) => {
       return handler(req, res);
     } catch (error) {
       if (error instanceof UnauthorizedException) {
-        res.status(401).json({
+        return res.status(401).json({
           status: false,
           message: "Unauthorized",
         });
-      } else {
-        res.status(500).json({
-          status: false,
-          message: "Internal Server Error",
-        });
       }
+      return res.status(500).json({
+        status: false,
+        message: "Internal Server Error",
+      });
     }
   };
 };
