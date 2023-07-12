@@ -1,15 +1,24 @@
 import AWS, { CognitoIdentityServiceProvider } from "aws-sdk";
 
-export default class AuthService {
+export default class CognitoService {
   private static getCognitoInstance(): CognitoIdentityServiceProvider {
     return new AWS.CognitoIdentityServiceProvider({
       region: process.env.AMAZON_AWS_DEFAULT_REGION as string,
     });
   }
 
+  public static async getUser(token: string) {
+    try {
+      const user = await CognitoService.getCognitoInstance().getUser({ AccessToken: token }).promise();
+      return user;
+    } catch (_) {
+      return null;
+    }
+  }
+
   public static async register(email: string, password: string): Promise<any> {
     try {
-      const cognito: CognitoIdentityServiceProvider = AuthService.getCognitoInstance();
+      const cognito: CognitoIdentityServiceProvider = CognitoService.getCognitoInstance();
       const userPool: string = process.env.USER_POOL as string;
 
       const result = await cognito
@@ -50,7 +59,7 @@ export default class AuthService {
 
   public static async login(email: string, password: string): Promise<any> {
     try {
-      const cognito: CognitoIdentityServiceProvider = AuthService.getCognitoInstance();
+      const cognito: CognitoIdentityServiceProvider = CognitoService.getCognitoInstance();
       const userPool: string = process.env.USER_POOL as string;
       const userPoolClient: string = process.env.USER_POOL_CLIENT as string;
 

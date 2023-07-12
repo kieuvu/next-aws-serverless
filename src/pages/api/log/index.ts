@@ -1,7 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { HttpMethod } from "../_utils/HttpMethod";
+import { AuthMiddleware } from "../_middleware/authMiddleware";
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method != HttpMethod.GET) res.status(405);
 
   const logMessage: string = `Log: ${new Date().getTime()}`;
@@ -13,3 +14,5 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     logMessage,
   });
 }
+
+export default AuthMiddleware(handler);

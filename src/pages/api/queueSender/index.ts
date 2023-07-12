@@ -1,8 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import SQSService from "../_services/SQSService";
 import { HttpMethod } from "../_utils/HttpMethod";
+import { AuthMiddleware } from "../_middleware/authMiddleware";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method != HttpMethod.POST) res.status(405);
 
   await SQSService.sendQueue({
@@ -17,3 +18,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     status: true,
   });
 }
+
+export default AuthMiddleware(handler);

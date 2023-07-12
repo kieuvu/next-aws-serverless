@@ -12,12 +12,13 @@ provider:
     AWS_SQS_URL: ${construct:jobs.queueUrl}
     USER_POOL: !Ref UserPool
     USER_POOL_CLIENT: !Ref UserClient
-  httpApi:
-    authorizers:
-      userAuthorization:
-        identitySource: $request.header.Authorization
-        issuerUrl: { "Fn::Join": ["", ["https://cognito-idp.us-east-1.amazonaws.com/", !Ref UserPool]] }
-        audience: !Ref UserClient
+  ### Auth Middleware
+  # httpApi:
+  #   authorizers:
+  #     userAuthorization:
+  #       identitySource: $request.header.Authorization
+  #       issuerUrl: { "Fn::Join": ["", ["https://cognito-idp.us-east-1.amazonaws.com/", !Ref UserPool]] }
+  #       audience: !Ref UserClient
   apiGateway:
     shouldStartNameWithService: true
     binaryMediaTypes:
@@ -68,6 +69,26 @@ functions:
     handler: server.handler
     events:
       # Using Amazon Aws Api Gateway v2 (HTTP API)
+      # - httpApi:
+      #     method: GET
+      #     path: /api/hello
+      #     authorizer:
+      #       name: userAuthorization
+      # - httpApi:
+      #     method: GET
+      #     path: /api/log
+      #     authorizer:
+      #       name: userAuthorization
+      # - httpApi:
+      #     method: GET
+      #     path: /api/createS3Presigned
+      #     authorizer:
+      #       name: userAuthorization
+      # - httpApi:
+      #     method: POST
+      #     path: /api/queueSender
+      #     authorizer:
+      #       name: userAuthorization
       - httpApi: "*"
       # Using Amazon Aws Api Gateway v1 (REST API - with stage name in url)
       # - http: ANY /
