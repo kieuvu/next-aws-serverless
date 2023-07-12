@@ -11,7 +11,7 @@ export default class CognitoService {
     });
   }
 
-  public static async getUser(token: string) {
+  public static async getUser(token: string): Promise<any> {
     try {
       const user: any = await CognitoService.getCognitoInstance()
         .getUser({ AccessToken: token })
@@ -22,20 +22,20 @@ export default class CognitoService {
     }
   }
 
-  public static async refreshToken(refreshToken: string) {
-    const params = {
-      AuthFlow: "REFRESH_TOKEN",
-      ClientId: CognitoService.userPoolClient,
-      UserPoolId: CognitoService.userPool,
-      AuthParameters: {
-        REFRESH_TOKEN: refreshToken,
-      },
-    };
-
+  public static async refreshToken(refreshToken: string): Promise<any> {
     const cognito: CognitoIdentityServiceProvider = CognitoService.getCognitoInstance();
 
     try {
-      const response: any = await cognito.adminInitiateAuth(params).promise();
+      const response: any = await cognito
+        .adminInitiateAuth({
+          AuthFlow: "REFRESH_TOKEN",
+          ClientId: CognitoService.userPoolClient,
+          UserPoolId: CognitoService.userPool,
+          AuthParameters: {
+            REFRESH_TOKEN: refreshToken,
+          },
+        })
+        .promise();
       return response?.AuthenticationResult ?? null;
     } catch (_) {
       return null;
@@ -46,7 +46,7 @@ export default class CognitoService {
     try {
       const cognito: CognitoIdentityServiceProvider = CognitoService.getCognitoInstance();
 
-      const result = await cognito
+      const result: any = await cognito
         .adminCreateUser({
           UserPoolId: CognitoService.userPool,
           Username: email,
@@ -86,7 +86,7 @@ export default class CognitoService {
     try {
       const cognito: CognitoIdentityServiceProvider = CognitoService.getCognitoInstance();
 
-      const response = await cognito
+      const response: any = await cognito
         .adminInitiateAuth({
           AuthFlow: "ADMIN_NO_SRP_AUTH",
           UserPoolId: CognitoService.userPool,
@@ -100,9 +100,7 @@ export default class CognitoService {
 
       delete response.AuthenticationResult?.IdToken; // if is not admin (prevent to access user details)
 
-      return {
-        token: response.AuthenticationResult,
-      };
+      return response.AuthenticationResult;
     } catch (error) {
       console.error(error);
       return false;

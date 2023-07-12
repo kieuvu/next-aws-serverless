@@ -9,8 +9,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const credentials = await CognitoService.login(email, password);
 
-  console.log("credentials", credentials);
-
   if (!credentials) {
     res.status(401).json({
       status: false,
@@ -20,6 +18,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   res.status(200).json({
     status: true,
-    credentials,
+    credentials: {
+      token: credentials,
+    },
   });
 }
