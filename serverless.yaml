@@ -22,7 +22,6 @@ provider:
     shouldStartNameWithService: true
     binaryMediaTypes:
       - "*/*"
-
   iam:
     role:
       statements:
@@ -65,59 +64,14 @@ resources:
           - "ADMIN_NO_SRP_AUTH"
 
 functions:
-  # Using Amazon Aws Api Gateway v2 (HTTP API)
-  # - httpApi: "*"
-  # Using Amazon Aws Api Gateway v1 (REST API - with stage name in url)
-  # - http: ANY /
-  # - http: ANY /{proxy+}
-  static-page:
+  api:
     handler: server.handler
     events:
+      # Using Amazon Aws Api Gateway v2 (HTTP API)
       - httpApi: "*"
-  hello:
-    handler: functions/apis/hello/hello.handler
-    events:
-      - httpApi:
-          method: GET
-          path: /api/hello
-          authorizer:
-            name: userAuthorization
-  log:
-    handler: functions/apis/log/log.handler
-    events:
-      - httpApi:
-          method: GET
-          path: /api/log
-          authorizer:
-            name: userAuthorization
-  createS3Presigned:
-    handler: functions/apis/s3/createS3Presigned.handler
-    events:
-      - httpApi:
-          method: GET
-          path: /api/createS3Presigned
-          authorizer:
-            name: userAuthorization
-  queueSender:
-    handler: functions/apis/queue/queueSender.handler
-    events:
-      - httpApi:
-          method: POST
-          path: /api/queueSender
-          authorizer:
-            name: userAuthorization
-  login:
-    handler: functions/apis/auth/login.handler
-    events:
-      - httpApi:
-          method: POST
-          path: /api/auth/login
-  register:
-    handler: functions/apis/auth/register.handler
-    events:
-      - httpApi:
-          method: POST
-          path: /api/auth/register
+      # Using Amazon Aws Api Gateway v1 (REST API - with stage name in url)
+      # - http: ANY /
+      # - http: ANY /{proxy+}
 
 plugins:
   - serverless-esbuild
@@ -141,7 +95,6 @@ custom:
     - bucketName: next-static-site-assets
       localDir: .next/static
       bucketPrefix: _next/static/
-
   esbuild:
     bundle: true
     minify: true
@@ -165,7 +118,7 @@ constructs:
   jobs:
     type: queue
     worker:
-      handler: functions/apis/queue/queueWorker.handler
+      handler: server.queueWorker
     # fifo: false
     ### The maxRetries option configures how many times each message will be retried in case of failure.
     ### maxRetries default: 3
