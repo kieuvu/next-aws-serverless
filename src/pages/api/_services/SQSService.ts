@@ -6,7 +6,7 @@ export default class SQSService {
   private static awsSecretAccessKey: string = process.env.AMAZON_AWS_ACCESS_KEY_SECRET as string;
   private static region: string = process.env.AMAZON_AWS_DEFAULT_REGION as string;
 
-  public static getSQSInstance() {
+  public static getSQSInstance(): SQSClient {
     return new SQSClient({
       credentials: {
         accessKeyId: SQSService.awsAccessKeyId,
@@ -16,14 +16,14 @@ export default class SQSService {
     });
   }
 
-  public static async sendQueue(body: any) {
-    const params: { MessageBody: string; QueueUrl: string } = {
-      MessageBody: JSON.stringify(body),
-      QueueUrl: SQSService.queueUrl,
-    };
-
+  public static async sendQueue(body: any): Promise<boolean> {
     try {
-      const data: any = await SQSService.getSQSInstance().send(new SendMessageCommand(params));
+      const data: any = await SQSService.getSQSInstance().send(
+        new SendMessageCommand({
+          MessageBody: JSON.stringify(body),
+          QueueUrl: SQSService.queueUrl,
+        }),
+      );
       console.log("data sent info:", data);
       return true;
     } catch (err) {
