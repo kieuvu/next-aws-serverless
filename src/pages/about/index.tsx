@@ -107,26 +107,13 @@ export default function About(): ReactElement {
         <Link href='/'>Back To Home</Link>
       </button>
 
-      {!isFetching && (
-        <>
-          {isUnauthorized ? (
-            <>
-              <button className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
-                <Link href='/register'>Register</Link>
-              </button>
-              <button className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
-                <Link href='/login'>Login</Link>
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={(): void => logout()}
-              className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
-            >
-              Logout
-            </button>
-          )}
-        </>
+      {!isFetching && !isUnauthorized && (
+        <button
+          onClick={(): void => logout()}
+          className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
+        >
+          Logout
+        </button>
       )}
     </div>
   );
