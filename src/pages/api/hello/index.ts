@@ -8,7 +8,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void>
 
   return res.status(200).json({
     status: true,
-    message: "Have a nice day " + new Date().getTime(),
+    message: "Have a nice day " + new Date().getTime() + " - env: " + process.env.APP_ENV,
   });
 }
 

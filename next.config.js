@@ -7,9 +7,7 @@ const nextConfig = {
     unoptimized: true,
   },
   output: "standalone",
-  assetPrefix: process.env.APP_ENV != 'local'
-    ? `https://${process.env.AWS_STATIC_BUCKET}.s3.amazonaws.com`
-    : undefined
+  // assetPrefix: `https://${process.env.AWS_STATIC_BUCKET}.s3.amazonaws.com`
 };
 
 module.exports = nextConfig;
