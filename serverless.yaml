@@ -139,7 +139,7 @@ constructs:
   jobs:
     type: queue
     worker:
-      handler: server.queueWorker
+      handler: queueWorker.handler
     # fifo: false
     ### The maxRetries option configures how many times each message will be retried in case of failure.
     ### maxRetries default: 3

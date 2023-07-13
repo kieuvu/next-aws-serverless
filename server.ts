@@ -17,23 +17,3 @@ const nextServer = new NextServer({
 export const handler = serverless(nextServer.getRequestHandler(), {
   binary: ["*/*"],
 });
-
-export function queueWorker(event: any, _: any, callback: any): any {
-  const response = {
-    statusCode: 200,
-    body: JSON.stringify({
-      message: "SQS event processed.",
-      input: event,
-    }),
-  };
-
-  for (const message of event.Records) {
-    const bodyData = JSON.parse(message.body);
-
-    console.log("event info: ", JSON.stringify(bodyData));
-
-    // Handle data here
-  }
-
-  callback(null, response);
-}
