@@ -5,7 +5,6 @@ import {
   AuthenticationResultType,
   GetUserResponse,
 } from "aws-sdk/clients/cognitoidentityserviceprovider";
-
 export default class CognitoService {
   private static userPool: string = process.env.USER_POOL as string;
   private static userPoolClient: string = process.env.USER_POOL_CLIENT as string;
@@ -110,10 +109,13 @@ export default class CognitoService {
         .promise();
 
       delete response.AuthenticationResult?.IdToken; // if is not admin (prevent to access user details)
-
       return response.AuthenticationResult;
     } catch (error) {
-      console.error(error);
+      const err = error as AWS.AWSError;
+      if (err.code === "NotAuthorizedException") console.error("Incorrect username or password.");
+      else if (err.code === "UserNotFoundException") console.error("User does not exist in system.");
+      else if (err.code === "InvalidParameterException") console.error(" Missing required parameter.");
+      else console.error("Internal Server Error", error);
       return false;
     }
   }
