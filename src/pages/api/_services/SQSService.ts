@@ -1,4 +1,4 @@
-import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
+import { SQSClient, SendMessageCommand, SendMessageCommandOutput } from "@aws-sdk/client-sqs";
 
 export default class SQSService {
   private static queueUrl: string = process.env.AWS_SQS_URL as string;
@@ -18,7 +18,7 @@ export default class SQSService {
 
   public static async sendQueue(body: any): Promise<boolean> {
     try {
-      const data: any = await SQSService.getSQSInstance().send(
+      const data: SendMessageCommandOutput = await SQSService.getSQSInstance().send(
         new SendMessageCommand({
           MessageBody: JSON.stringify(body),
           QueueUrl: SQSService.queueUrl,

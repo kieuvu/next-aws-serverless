@@ -12,7 +12,7 @@ export const AuthMiddleware = (handler: any) => {
       const user: any = await CognitoService.getUser(token);
 
       if (!user) throw new UnauthorizedException();
-      return handler(req, res);
+      return handler(req, res, user);
     } catch (error) {
       if (error instanceof UnauthorizedException) {
         return res.status(401).json({
