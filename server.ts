@@ -18,7 +18,7 @@ export const handler = serverless(nextServer.getRequestHandler(), {
   binary: ["*/*"],
 });
 
-export const queueWorker = (event: any, _: any, callback: any) => {
+export function queueWorker(event: any, _: any, callback: any): any {
   const response = {
     statusCode: 200,
     body: JSON.stringify({
@@ -36,4 +36,4 @@ export const queueWorker = (event: any, _: any, callback: any) => {
   }
 
   callback(null, response);
-};
+}

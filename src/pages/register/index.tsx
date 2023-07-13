@@ -5,7 +5,7 @@ export default function Register(): ReactElement {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
-  const onSubmit = async (): Promise<void> => {
+  async function onSubmit(): Promise<void> {
     if (!email.trim() || !password.trim()) {
       alert("Fill out all fields");
     }
@@ -20,7 +20,7 @@ export default function Register(): ReactElement {
       .fetch();
 
     console.log("Submitted", response);
-  };
+  }
 
   return (
     <div className='flex items-center justify-center h-[100vh] flex-col'>

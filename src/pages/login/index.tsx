@@ -8,7 +8,7 @@ export default function Login(): ReactElement {
 
   const router: NextRouter = useRouter();
 
-  const onSubmit = async (): Promise<void> => {
+  async function onSubmit(): Promise<void> {
     if (!email.trim() || !password.trim()) {
       alert("Fill out all fields");
     }
@@ -27,7 +27,7 @@ export default function Login(): ReactElement {
       console.log("Login Success", response);
       router.push("/about");
     }
-  };
+  }
 
   return (
     <div className='flex items-center justify-center h-[100vh] flex-col'>

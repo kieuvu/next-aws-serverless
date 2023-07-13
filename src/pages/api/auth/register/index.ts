@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import CognitoService from "../../_services/CognitoService";
 import { HttpMethod } from "../../_utils/HttpMethod";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
   if (req.method != HttpMethod.POST)
     return res.status(405).json({ status: false, message: "Method Not Allowed" });
 

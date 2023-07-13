@@ -14,7 +14,7 @@ export default function ImageUpload(): ReactElement {
   );
 }
 
-const uploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>): Promise<any> => {
+async function uploadPhoto(e: React.ChangeEvent<HTMLInputElement>): Promise<any> {
   const file: File = e.target.files?.[0]!;
   const fileName: string = encodeURIComponent(file.name);
   const fileType: string = encodeURIComponent(file.type);
@@ -36,4 +36,4 @@ const uploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>): Promise<any>
   });
 
   return await new FetchService().isPostRequest().setURL(url).setFormData(formData).fetch();
-};
+}

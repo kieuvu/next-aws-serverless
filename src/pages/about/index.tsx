@@ -4,22 +4,22 @@ import Link from "next/link";
 import { NextRouter, useRouter } from "next/router";
 import { ReactElement, useEffect, useState } from "react";
 
-const logToServer = async (): Promise<any> => {
+async function logToServer(): Promise<any> {
   return await new FetchService().setURL("/api/log").withBearerAuthorization().fetch();
-};
+}
 
-const getHelloApi = async (): Promise<any> => {
+async function getHelloApi(): Promise<any> {
   return await new FetchService().setURL("/api/hello").withBearerAuthorization().fetch();
-};
+}
 
-const dispatchQueue = async (): Promise<any> => {
+async function dispatchQueue(): Promise<any> {
   await new FetchService()
     .isPostRequest()
     .setURL("api/queueSender")
     .setHeader("Content-Type", "application/json")
     .withBearerAuthorization()
     .fetch();
-};
+}
 
 export default function About(): ReactElement {
   const [helloMessage, setHelloMessage] = useState<string>("");
@@ -31,26 +31,26 @@ export default function About(): ReactElement {
   const router: NextRouter = useRouter();
 
   useEffect((): void => {
-    const fetch = async (): Promise<void> => {
+    async function fetch(): Promise<void> {
       setIsFetching(true);
       const response: any = await getHelloApi();
       setIsFetching(false);
       if (response.status) return setHelloMessage(response.message);
       setIsUnauthorized(true);
-    };
+    }
 
     fetch();
   }, []);
 
-  const logout = () => {
+  function logout(): void {
     localStorage.clear();
     router.reload();
-  };
+  }
 
-  const handleLogToServer = async (): Promise<void> => {
+  async function handleLogToServer(): Promise<void> {
     const logData: any = await logToServer();
     if (logData?.status) setLogMessage(logData.logMessage);
-  };
+  }
 
   return (
     <div className='h-[100vh] flex items-center justify-center flex-col'>

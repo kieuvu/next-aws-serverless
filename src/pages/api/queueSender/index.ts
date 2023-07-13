@@ -3,7 +3,7 @@ import SQSService from "../_services/SQSService";
 import { HttpMethod } from "../_utils/HttpMethod";
 import { AuthMiddleware } from "../_middleware/authMiddleware";
 
-async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
   if (req.method != HttpMethod.POST)
     return res.status(405).json({ status: false, message: "Method Not Allowed" });
 

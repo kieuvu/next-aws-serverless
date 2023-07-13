@@ -2,10 +2,12 @@ import { NextApiRequest, NextApiResponse } from "next";
 import CognitoService from "../_services/CognitoService";
 import UnauthorizedException from "../_exceptions/UnauthorizedException";
 
-export const AuthMiddleware = (handler: any) => {
-  return async (req: NextApiRequest, res: NextApiResponse) => {
+export function AuthMiddleware(
+  handler: (req: NextApiRequest, res: NextApiResponse, user: any) => Promise<any>,
+): (req: NextApiRequest, res: NextApiResponse) => Promise<any> {
+  return async (req: NextApiRequest, res: NextApiResponse): Promise<any> => {
     try {
-      const authorizationToken = req.headers?.authorization;
+      const authorizationToken: string | undefined = req.headers?.authorization;
       if (!authorizationToken) throw new UnauthorizedException();
 
       const token: string = authorizationToken.split(" ")[1];
@@ -26,4 +28,4 @@ export const AuthMiddleware = (handler: any) => {
       });
     }
   };
-};
+}

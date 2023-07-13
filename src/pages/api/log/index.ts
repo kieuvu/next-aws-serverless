@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { HttpMethod } from "../_utils/HttpMethod";
 import { AuthMiddleware } from "../_middleware/authMiddleware";
 
-function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse): Promise<any> {
   if (req.method != HttpMethod.GET)
     return res.status(405).json({ status: false, message: "Method Not Allowed" });
 
