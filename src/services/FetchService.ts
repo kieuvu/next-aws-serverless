@@ -40,7 +40,7 @@ export default class FetchService {
 
   public withBearerAuthorization(): this {
     const credentials: any = JSON.parse(localStorage.getItem("credentials") as string);
-    const accessToken: string = credentials.AccessToken;
+    const accessToken: string = credentials?.AccessToken;
     const token: string = `Bearer ${accessToken}`;
     return this.setHeader("Authorization", token);
   }

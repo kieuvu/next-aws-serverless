@@ -7,6 +7,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     return res.status(405).json({ status: false, message: "Method Not Allowed" });
 
   return res.status(200).json({
+    status: true,
     message: "Have a nice day " + new Date().getTime(),
   });
 }

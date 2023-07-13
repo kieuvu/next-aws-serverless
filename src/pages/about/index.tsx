@@ -1,6 +1,7 @@
 import ImageUpload from "@/components/ImageUpload";
 import FetchService from "@/services/FetchService";
 import Link from "next/link";
+import { NextRouter, useRouter } from "next/router";
 import { ReactElement, useEffect, useState } from "react";
 
 const logToServer = async (): Promise<any> => {
@@ -24,15 +25,27 @@ export default function About(): ReactElement {
   const [helloMessage, setHelloMessage] = useState<string>("");
   const [logMessage, setLogMessage] = useState<string>("");
   const [uploadFileToggle, setUploadFileToggle] = useState<boolean>(false);
+  const [isUnauthorized, setIsUnauthorized] = useState<boolean>(false);
+  const [isFetching, setIsFetching] = useState<boolean>(true);
+
+  const router: NextRouter = useRouter();
 
   useEffect((): void => {
     const fetch = async (): Promise<void> => {
+      setIsFetching(true);
       const response: any = await getHelloApi();
-      if (response?.message) setHelloMessage(response.message);
+      setIsFetching(false);
+      if (response.status) return setHelloMessage(response.message);
+      setIsUnauthorized(true);
     };
 
     fetch();
   }, []);
+
+  const logout = () => {
+    localStorage.clear();
+    router.reload();
+  };
 
   const handleLogToServer = async (): Promise<void> => {
     const logData: any = await logToServer();
@@ -42,7 +55,28 @@ export default function About(): ReactElement {
   return (
     <div className='h-[100vh] flex items-center justify-center flex-col'>
       <code className='font-mono font-bold my-2'>
-        Test API: Get Hello Message From Api: [{helloMessage}]
+        Test API: Get Hello Message From Api: [
+        {isUnauthorized ? (
+          <>
+            <code>Unauthorized: </code>
+            <Link
+              className='text-blue-500'
+              href='/login'
+            >
+              Login
+            </Link>
+            |
+            <Link
+              className='text-blue-500'
+              href='/register'
+            >
+              Register
+            </Link>
+          </>
+        ) : (
+          helloMessage
+        )}
+        ]
       </code>
 
       <button
@@ -69,9 +103,31 @@ export default function About(): ReactElement {
         Dispatch Queue
       </button>
 
-      <button className=' my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
+      <button className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
         <Link href='/'>Back To Home</Link>
       </button>
+
+      {!isFetching && (
+        <>
+          {isUnauthorized ? (
+            <>
+              <button className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
+                <Link href='/register'>Register</Link>
+              </button>
+              <button className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
+                <Link href='/login'>Login</Link>
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={(): void => logout()}
+              className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
+            >
+              Logout
+            </button>
+          )}
+        </>
+      )}
     </div>
   );
 }
