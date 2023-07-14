@@ -3,7 +3,11 @@ import CognitoService from "../_services/CognitoService";
 import UnauthorizedException from "../_exceptions/UnauthorizedException";
 
 export function AuthMiddleware(
-  handler: (req: NextApiRequest, res: NextApiResponse, user: any) => Promise<any>,
+  handler: (
+    req: NextApiRequest,
+    res: NextApiResponse,
+    user: any,
+  ) => Promise<any>,
 ): (req: NextApiRequest, res: NextApiResponse) => Promise<any> {
   return async (req: NextApiRequest, res: NextApiResponse): Promise<any> => {
     try {

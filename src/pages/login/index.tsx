@@ -23,7 +23,10 @@ export default function Login(): ReactElement {
       .fetch();
 
     if (response.status) {
-      localStorage.setItem("credentials", JSON.stringify(response.credentials.token));
+      localStorage.setItem(
+        "credentials",
+        JSON.stringify(response.credentials.token),
+      );
       console.log("Login Success", response);
       router.push("/about");
     }
@@ -46,7 +49,9 @@ export default function Login(): ReactElement {
             type='text'
             required
             className='border'
-            onChange={(e: React.ChangeEvent<HTMLInputElement>): void => setEmail(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
+              setEmail(e.target.value)
+            }
           />
         </div>
         <div>
@@ -62,7 +67,9 @@ export default function Login(): ReactElement {
             type='password'
             required
             className='border'
-            onChange={(e: React.ChangeEvent<HTMLInputElement>): void => setPassword(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
+              setPassword(e.target.value)
+            }
           />
         </div>
       </div>

@@ -6,7 +6,9 @@ export default function ImageUpload(): ReactElement {
     <>
       <p>Upload a .png or .jpg image (max 1MB).</p>
       <input
-        onChange={(e: React.ChangeEvent<HTMLInputElement>): Promise<any> => uploadPhoto(e)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>): Promise<any> =>
+          uploadPhoto(e)
+        }
         type='file'
         accept='image/png, image/jpeg'
       />
@@ -14,7 +16,9 @@ export default function ImageUpload(): ReactElement {
   );
 }
 
-async function uploadPhoto(e: React.ChangeEvent<HTMLInputElement>): Promise<any> {
+async function uploadPhoto(
+  e: React.ChangeEvent<HTMLInputElement>,
+): Promise<any> {
   const file: File = e.target.files?.[0]!;
   const fileName: string = encodeURIComponent(file.name);
   const fileType: string = encodeURIComponent(file.type);
@@ -31,9 +35,15 @@ async function uploadPhoto(e: React.ChangeEvent<HTMLInputElement>): Promise<any>
   const { url, fields } = await res;
   const formData: FormData = new FormData();
 
-  Object.entries({ ...fields, file }).forEach(([key, value]) => {
-    formData.append(key, value as string);
-  });
+  Object.entries({ ...fields, file }).forEach(
+    ([key, value]: [string, any]): void => {
+      formData.append(key, value as string);
+    },
+  );
 
-  return await new FetchService().isPostRequest().setURL(url).setFormData(formData).fetch();
+  return await new FetchService()
+    .isPostRequest()
+    .setURL(url)
+    .setFormData(formData)
+    .fetch();
 }

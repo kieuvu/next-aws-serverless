@@ -5,11 +5,17 @@ import { NextRouter, useRouter } from "next/router";
 import { ReactElement, useEffect, useState } from "react";
 
 async function logToServer(): Promise<any> {
-  return await new FetchService().setURL("/api/log").withBearerAuthorization().fetch();
+  return await new FetchService()
+    .setURL("/api/log")
+    .withBearerAuthorization()
+    .fetch();
 }
 
 async function getHelloApi(): Promise<any> {
-  return await new FetchService().setURL("/api/hello").withBearerAuthorization().fetch();
+  return await new FetchService()
+    .setURL("/api/hello")
+    .withBearerAuthorization()
+    .fetch();
 }
 
 async function dispatchQueue(): Promise<any> {
@@ -61,15 +67,13 @@ export default function About(): ReactElement {
             <code>Unauthorized: </code>
             <Link
               className='text-blue-500'
-              href='/login'
-            >
+              href='/login'>
               Login
             </Link>
             |
             <Link
               className='text-blue-500'
-              href='/register'
-            >
+              href='/register'>
               Register
             </Link>
           </>
@@ -81,16 +85,14 @@ export default function About(): ReactElement {
 
       <button
         onClick={(): Promise<void> => handleLogToServer()}
-        className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
-      >
+        className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
         Log Anything On Server <br />
         {logMessage}
       </button>
 
       <button
         onClick={(): void => setUploadFileToggle(!uploadFileToggle)}
-        className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
-      >
+        className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
         Upload File To S3
       </button>
 
@@ -98,8 +100,7 @@ export default function About(): ReactElement {
 
       <button
         onClick={(): Promise<any> => dispatchQueue()}
-        className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
-      >
+        className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
         Dispatch Queue
       </button>
 
@@ -110,8 +111,7 @@ export default function About(): ReactElement {
       {!isFetching && !isUnauthorized && (
         <button
           onClick={(): void => logout()}
-          className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
-        >
+          className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
           Logout
         </button>
       )}

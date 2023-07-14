@@ -39,7 +39,9 @@ export default function Register(): ReactElement {
             type='text'
             required
             className='border'
-            onChange={(e: React.ChangeEvent<HTMLInputElement>): void => setEmail(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
+              setEmail(e.target.value)
+            }
           />
         </div>
         <div>
@@ -55,7 +57,9 @@ export default function Register(): ReactElement {
             type='password'
             required
             className='border'
-            onChange={(e: React.ChangeEvent<HTMLInputElement>): void => setPassword(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
+              setPassword(e.target.value)
+            }
           />
         </div>
       </div>

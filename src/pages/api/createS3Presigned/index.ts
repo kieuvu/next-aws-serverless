@@ -3,14 +3,20 @@ import S3Service from "../_services/S3Service";
 import { NextApiRequest, NextApiResponse } from "next";
 import { HttpMethod } from "../_utils/HttpMethod";
 import { AuthMiddleware } from "../_middleware/authMiddleware";
+import { PresignedPost } from "aws-sdk/clients/s3";
 
-async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
+async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+): Promise<void> {
   if (req.method != HttpMethod.GET)
-    return res.status(405).json({ status: false, message: "Method Not Allowed" });
+    return res
+      .status(405)
+      .json({ status: false, message: "Method Not Allowed" });
 
   const { fileType } = req.query;
 
-  const post = S3Service.createPresignedPost({
+  const post: PresignedPost = S3Service.createPresignedPost({
     key: `images/${randomUUID()}`,
     "Content-Type": fileType,
   });

@@ -1,14 +1,21 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import CognitoService from "../../_services/CognitoService";
 import { HttpMethod } from "../../_utils/HttpMethod";
+import { AuthenticationResultType } from "aws-sdk/clients/cognitoidentityserviceprovider";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+): Promise<void> {
   if (req.method != HttpMethod.POST)
-    return res.status(405).json({ status: false, message: "Method Not Allowed" });
+    return res
+      .status(405)
+      .json({ status: false, message: "Method Not Allowed" });
 
   const { email, password } = JSON.parse(req.body);
 
-  const credentials = await CognitoService.login(email, password);
+  const credentials: boolean | AuthenticationResultType | undefined =
+    await CognitoService.login(email, password);
 
   if (!credentials) {
     return res.status(401).json({

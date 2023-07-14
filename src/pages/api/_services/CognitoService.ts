@@ -7,8 +7,10 @@ import {
 } from "aws-sdk/clients/cognitoidentityserviceprovider";
 export default class CognitoService {
   private static userPool: string = process.env.USER_POOL as string;
-  private static userPoolClient: string = process.env.USER_POOL_CLIENT as string;
-  private static region: string = process.env.AMAZON_AWS_DEFAULT_REGION as string;
+  private static userPoolClient: string = process.env
+    .USER_POOL_CLIENT as string;
+  private static region: string = process.env
+    .AMAZON_AWS_DEFAULT_REGION as string;
 
   private static getCognitoInstance(): CognitoIdentityServiceProvider {
     return new AWS.CognitoIdentityServiceProvider({
@@ -30,7 +32,8 @@ export default class CognitoService {
   public static async refreshToken(
     refreshToken: string,
   ): Promise<AuthenticationResultType | null | undefined> {
-    const cognito: CognitoIdentityServiceProvider = CognitoService.getCognitoInstance();
+    const cognito: CognitoIdentityServiceProvider =
+      CognitoService.getCognitoInstance();
 
     try {
       const response: AdminInitiateAuthResponse = await cognito
@@ -49,9 +52,13 @@ export default class CognitoService {
     }
   }
 
-  public static async register(email: string, password: string): Promise<boolean> {
+  public static async register(
+    email: string,
+    password: string,
+  ): Promise<boolean> {
     try {
-      const cognito: CognitoIdentityServiceProvider = CognitoService.getCognitoInstance();
+      const cognito: CognitoIdentityServiceProvider =
+        CognitoService.getCognitoInstance();
 
       const result: AdminCreateUserResponse = await cognito
         .adminCreateUser({
@@ -94,7 +101,8 @@ export default class CognitoService {
     password: string,
   ): Promise<AuthenticationResultType | boolean | undefined> {
     try {
-      const cognito: CognitoIdentityServiceProvider = CognitoService.getCognitoInstance();
+      const cognito: CognitoIdentityServiceProvider =
+        CognitoService.getCognitoInstance();
 
       const response: AdminInitiateAuthResponse = await cognito
         .adminInitiateAuth({
@@ -112,9 +120,12 @@ export default class CognitoService {
       return response.AuthenticationResult;
     } catch (error) {
       const err = error as AWS.AWSError;
-      if (err.code === "NotAuthorizedException") console.error("Incorrect username or password.");
-      else if (err.code === "UserNotFoundException") console.error("User does not exist in system.");
-      else if (err.code === "InvalidParameterException") console.error(" Missing required parameter.");
+      if (err.code === "NotAuthorizedException")
+        console.error("Incorrect username or password.");
+      else if (err.code === "UserNotFoundException")
+        console.error("User does not exist in system.");
+      else if (err.code === "InvalidParameterException")
+        console.error(" Missing required parameter.");
       else console.error("Internal Server Error", error);
       return false;
     }
