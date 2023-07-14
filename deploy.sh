@@ -27,14 +27,14 @@ cp -r public $DISTRIBUTION_FOLDER/
 
 cd $DISTRIBUTION_FOLDER
 
-echo "Enter function name (Input blank to deploy all functions):"
-read DEPLOY_FUNCTION
+# echo "Enter function name (Input blank to deploy all functions):"
+# read DEPLOY_FUNCTION
 
-if [[ "$DEPLOY_FUNCTION" == "" ]]; then
+# if [[ "$DEPLOY_FUNCTION" == "" ]]; then
   sls deploy
-else
-  sls deploy function -f "$DEPLOY_FUNCTION"
-fi
+# else
+#   sls deploy function -f "$DEPLOY_FUNCTION"
+# fi
 
 cd ..
 rm -rf $DISTRIBUTION_FOLDER

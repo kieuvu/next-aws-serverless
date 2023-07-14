@@ -6,17 +6,14 @@ import {
   CognitoIdentityProvider,
   GetUserCommandOutput,
 } from "@aws-sdk/client-cognito-identity-provider";
-import Env from "../_utils/Env";
+import { AwsClientConfig, AwsConfig } from "../_configs/AwsConfig";
 
 export default class CognitoService {
-  private static userPool: string = Env.get<string>("USER_POOL");
-  private static userPoolClient: string = Env.get<string>("USER_POOL_CLIENT");
-  private static region: string = Env.get<string>("AMAZON_AWS_DEFAULT_REGION");
+  private static userPool: string = AwsConfig.userPool;
+  private static userPoolClient: string = AwsConfig.userPoolClient;
 
   private static getCognitoInstance(): CognitoIdentityProvider {
-    return new CognitoIdentityProvider({
-      region: CognitoService.region,
-    });
+    return new CognitoIdentityProvider(AwsClientConfig);
   }
 
   public static async getUser(
@@ -27,7 +24,6 @@ export default class CognitoService {
         await CognitoService.getCognitoInstance().getUser({
           AccessToken: token,
         });
-
       return user ?? null;
     } catch (_) {
       return null;
@@ -81,18 +77,16 @@ export default class CognitoService {
           MessageAction: "SUPPRESS",
         });
 
-      if (result.User) {
-        await cognito.adminSetUserPassword({
-          Password: password,
-          UserPoolId: CognitoService.userPool,
-          Username: email,
-          Permanent: true,
-        });
-      }
+      if (!result.User) throw Error();
 
+      await cognito.adminSetUserPassword({
+        Password: password,
+        UserPoolId: CognitoService.userPool,
+        Username: email,
+        Permanent: true,
+      });
       return true;
     } catch (error) {
-      console.error(error);
       return false;
     }
   }

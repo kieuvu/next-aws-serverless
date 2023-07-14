@@ -3,16 +3,13 @@ import {
   SendMessageCommand,
   SendMessageCommandOutput,
 } from "@aws-sdk/client-sqs";
-import Env from "../_utils/Env";
+import { AwsClientConfig, AwsConfig } from "../_configs/AwsConfig";
 
 export default class SQSService {
-  private static queueUrl: string = Env.get<string>("AWS_SQS_URL");
-  private static region: string = Env.get<string>("AMAZON_AWS_DEFAULT_REGION");
+  private static queueUrl: string = AwsConfig.queueUrl;
 
   public static getSQSInstance(): SQSClient {
-    return new SQSClient({
-      region: SQSService.region,
-    });
+    return new SQSClient(AwsClientConfig);
   }
 
   public static async sendQueue(body: any): Promise<boolean> {

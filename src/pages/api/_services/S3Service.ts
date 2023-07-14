@@ -1,16 +1,12 @@
 import { PresignedPost, createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { S3Client } from "@aws-sdk/client-s3";
-import Env from "../_utils/Env";
+import { AwsClientConfig, AwsConfig } from "../_configs/AwsConfig";
 
 export default class S3Service {
-  private static region: string = Env.get<string>("AMAZON_AWS_DEFAULT_REGION");
-  private static bucket: string = Env.get<string>("AWS_BUCKET");
+  private static bucket: string = AwsConfig.bucket;
 
   public static getS3Instance(): S3Client {
-    return new S3Client({
-      apiVersion: "2006-03-01",
-      region: S3Service.region,
-    });
+    return new S3Client(AwsClientConfig);
   }
 
   public static async createPresignedPost(data: {

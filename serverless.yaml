@@ -98,6 +98,7 @@ functions:
 
 plugins:
   - serverless-esbuild
+  - serverless-dotenv-plugin
   - serverless-lift
   - serverless-s3-sync
 
@@ -123,6 +124,14 @@ custom:
     exclude: "*"
     external:
       - "next"
+  dotenv:
+    include:
+      - AMAZON_AWS_ACCESS_KEY_ID
+      - AMAZON_AWS_ACCESS_KEY_SECRET
+    required:
+      env:
+        - AMAZON_AWS_ACCESS_KEY_ID
+        - AMAZON_AWS_ACCESS_KEY_SECRET
 
 constructs:
   jobs:
