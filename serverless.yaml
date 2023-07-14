@@ -12,6 +12,8 @@ provider:
     AWS_SQS_URL: ${construct:jobs.queueUrl}
     USER_POOL: !Ref UserPool
     USER_POOL_CLIENT: !Ref UserClient
+    AMAZON_AWS_DEFAULT_REGION: ${self:provider.region}
+    AWS_STATIC_BUCKET: next-static-site-assets
   ### Auth Middleware
   # httpApi:
   #   authorizers:
@@ -96,7 +98,6 @@ functions:
 
 plugins:
   - serverless-esbuild
-  - serverless-dotenv-plugin
   - serverless-lift
   - serverless-s3-sync
 
@@ -122,18 +123,6 @@ custom:
     exclude: "*"
     external:
       - "next"
-  dotenv:
-    exclude:
-      - APP_ENV
-      - AWS_BUCKET
-      - AWS_SQS_URL
-      - USER_POOL
-      - USER_POOL_CLIENT
-    required:
-      env:
-        - AMAZON_AWS_ACCESS_KEY_ID
-        - AMAZON_AWS_ACCESS_KEY_SECRET
-        - AMAZON_AWS_DEFAULT_REGION
 
 constructs:
   jobs:

@@ -3,7 +3,7 @@ import S3Service from "../_services/S3Service";
 import { NextApiRequest, NextApiResponse } from "next";
 import { HttpMethod } from "../_utils/HttpMethod";
 import { AuthMiddleware } from "../_middleware/authMiddleware";
-import { PresignedPost } from "aws-sdk/clients/s3";
+import { PresignedPost } from "@aws-sdk/s3-presigned-post";
 
 async function handler(
   req: NextApiRequest,
@@ -16,9 +16,9 @@ async function handler(
 
   const { fileType } = req.query;
 
-  const post: PresignedPost = S3Service.createPresignedPost({
+  const post: PresignedPost = await S3Service.createPresignedPost({
     key: `images/${randomUUID()}`,
-    "Content-Type": fileType,
+    "Content-Type": fileType as string,
   });
 
   return res.status(200).json(post);

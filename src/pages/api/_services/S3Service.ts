@@ -1,25 +1,29 @@
-import S3, { PresignedPost } from "aws-sdk/clients/s3";
+import { PresignedPost, createPresignedPost } from "@aws-sdk/s3-presigned-post";
+import { S3Client } from "@aws-sdk/client-s3";
 import Env from "../_utils/Env";
 
 export default class S3Service {
-  private static kid: string = Env.get<string>("AMAZON_AWS_ACCESS_KEY_ID");
-  private static sid: string = Env.get<string>("AMAZON_AWS_ACCESS_KEY_SECRET");
+  private static region: string = Env.get<string>("AMAZON_AWS_DEFAULT_REGION");
   private static bucket: string = Env.get<string>("AWS_BUCKET");
 
-  public static getS3Instance(): S3 {
-    return new S3({
-      accessKeyId: S3Service.kid,
-      secretAccessKey: S3Service.sid,
+  public static getS3Instance(): S3Client {
+    return new S3Client({
       apiVersion: "2006-03-01",
+      region: S3Service.region,
     });
   }
 
-  public static createPresignedPost(fields: any): PresignedPost {
-    return S3Service.getS3Instance().createPresignedPost({
+  public static async createPresignedPost(data: {
+    key: string;
+    "Content-Type": string;
+  }): Promise<PresignedPost> {
+    const { key, ...fields } = data;
+    return await createPresignedPost(S3Service.getS3Instance(), {
       Bucket: S3Service.bucket,
-      Fields: fields,
-      Expires: 300,
+      Key: key,
       Conditions: [["content-length-range", 0, 1048576]],
+      Fields: fields,
+      Expires: 600,
     });
   }
 }
