@@ -1,16 +1,15 @@
 import S3, { PresignedPost } from "aws-sdk/clients/s3";
+import Env from "../_utils/Env";
 
 export default class S3Service {
-  private static awsAccessKeyId: string = process.env
-    .AMAZON_AWS_ACCESS_KEY_ID as string;
-  private static awsSecretAccessKey: string = process.env
-    .AMAZON_AWS_ACCESS_KEY_SECRET as string;
-  private static bucket: string = process.env.AWS_BUCKET as string;
+  private static kid: string = Env.get<string>("AMAZON_AWS_ACCESS_KEY_ID");
+  private static sid: string = Env.get<string>("AMAZON_AWS_ACCESS_KEY_SECRET");
+  private static bucket: string = Env.get<string>("AWS_BUCKET");
 
   public static getS3Instance(): S3 {
     return new S3({
-      accessKeyId: S3Service.awsAccessKeyId,
-      secretAccessKey: S3Service.awsSecretAccessKey,
+      accessKeyId: S3Service.kid,
+      secretAccessKey: S3Service.sid,
       apiVersion: "2006-03-01",
     });
   }

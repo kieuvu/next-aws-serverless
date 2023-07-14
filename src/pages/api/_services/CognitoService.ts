@@ -1,4 +1,5 @@
 import AWS, { CognitoIdentityServiceProvider } from "aws-sdk";
+import Env from "../_utils/Env";
 import {
   AdminCreateUserResponse,
   AdminInitiateAuthResponse,
@@ -7,11 +8,9 @@ import {
 } from "aws-sdk/clients/cognitoidentityserviceprovider";
 
 export default class CognitoService {
-  private static userPool: string = process.env.USER_POOL as string;
-  private static userPoolClient: string = process.env
-    .USER_POOL_CLIENT as string;
-  private static region: string = process.env
-    .AMAZON_AWS_DEFAULT_REGION as string;
+  private static userPool: string = Env.get<string>("USER_POOL");
+  private static userPoolClient: string = Env.get<string>("USER_POOL_CLIENT");
+  private static region: string = Env.get<string>("AMAZON_AWS_DEFAULT_REGION");
 
   private static getCognitoInstance(): CognitoIdentityServiceProvider {
     return new AWS.CognitoIdentityServiceProvider({

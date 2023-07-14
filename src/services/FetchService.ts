@@ -64,7 +64,7 @@ export default class FetchService {
       options.body = this.isFormData ? this.data : JSON.stringify(this.data);
     }
 
-    const request: any = await fetch(urlTemp, options);
+    const request: Response = await fetch(urlTemp, options);
 
     try {
       return await request.json();

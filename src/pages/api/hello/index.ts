@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { HttpMethod } from "../_utils/HttpMethod";
 import { AuthMiddleware } from "../_middleware/authMiddleware";
+import Env from "../_utils/Env";
 
 async function handler(
   req: NextApiRequest,
@@ -17,7 +18,7 @@ async function handler(
       "Have a nice day " +
       new Date().getTime() +
       " - env: " +
-      process.env.APP_ENV,
+      Env.get<string>("APP_ENV"),
   });
 }
 
