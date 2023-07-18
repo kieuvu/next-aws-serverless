@@ -7,13 +7,16 @@ provider:
   runtime: nodejs16.x
   region: us-east-1
   environment:
-    APP_ENV: ${sls:stage}
-    AWS_BUCKET: !Ref Storage
-    AWS_SQS_URL: ${construct:jobs.queueUrl}
     USER_POOL: !Ref UserPool
+    AWS_BUCKET: !Ref Storage
     USER_POOL_CLIENT: !Ref UserClient
+    DYNAMODB_TABLE_NAME: !Ref MyDynamoDbTable
+    ### DynamoDB DAX Endpoint Variable
+    # DYNAMODB_DAX_ENDPOINT: !GetAtt MyDaxCluster.ClusterDiscoveryEndpoint
+    APP_ENV: ${sls:stage}
+    AWS_SQS_URL: ${construct:jobs.queueUrl}
     AMAZON_AWS_DEFAULT_REGION: ${self:provider.region}
-    AWS_STATIC_BUCKET: next-static-site-assets
+    AWS_STATIC_BUCKET: next-static-site-assets # TODO [AssetsBucket] use !Ref AssetsBucket instead of fixed bucket name
   ### Auth Middleware
   # httpApi:
   #   authorizers:
@@ -30,19 +33,71 @@ provider:
       statements:
         - Effect: Allow
           Action:
+            # Cognito
             - cognito-idp:AdminInitiateAuth
             - cognito-idp:AdminCreateUser
             - cognito-idp:AdminSetUserPassword
+            # DynamoDb
+            - dynamodb:DescribeTable
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
           Resource: "*"
 
 resources:
   Resources:
+    ### DynamoDB DAX IAM Role
+    # MyDaxRole:
+    #   Type: AWS::IAM::Role
+    #   Properties:
+    #     RoleName: my-dax-role
+    #     AssumeRolePolicyDocument:
+    #       Statement:
+    #         - Effect: Allow
+    #           Principal:
+    #             Service: dax.amazonaws.com
+    #           Action: sts:AssumeRole
+    #     Policies:
+    #       - PolicyName: dax-policy
+    #         PolicyDocument:
+    #           Statement:
+    #             - Effect: Allow
+    #               Action: dax:*
+    #               Resource: "*"
+    #     Description: String
+    #     ManagedPolicyArns:
+    #       - String
+    #     MaxSessionDuration: Integer
+    #     Path: String
+    #     PermissionsBoundary: String
+    #     Tags:
+    #       - Tag
     Storage:
       Type: AWS::S3::Bucket
     AssetsBucket:
       Type: AWS::S3::Bucket
+      Properties: # TODO [AssetsBucket]: Remove to use auto generated bucket name
+        BucketName: next-static-site-assets # TODO [AssetsBucket]: Remove to use auto generated bucket name
+        CorsConfiguration:
+          CorsRules:
+            - AllowedMethods:
+                - GET
+                - HEAD
+              AllowedOrigins:
+                - "*"
+    AssetsBucketPolicy:
+      Type: AWS::S3::BucketPolicy
       Properties:
-        BucketName: next-static-site-assets
+        Bucket: !Ref AssetsBucket
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal: "*"
+              Action: s3:GetObject
+              Resource: !Sub "arn:aws:s3:::${AssetsBucket}/*"
     UserPool:
       Type: AWS::Cognito::UserPool
       Properties:
@@ -65,30 +120,82 @@ resources:
         IdTokenValidity: 5
         ExplicitAuthFlows:
           - "ADMIN_NO_SRP_AUTH"
-
+    MyDynamoDbTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        TableName: MyDynamoDbTable
+        ProvisionedThroughput:
+          ReadCapacityUnits: 0
+          WriteCapacityUnits: 0
+        TimeToLiveSpecification:
+          AttributeName: ttl
+          Enabled: true
+        # ContributorInsightsSpecification: ContributorInsightsSpecification
+        # DeletionProtectionEnabled: Boolean
+        # GlobalSecondaryIndexes:
+        #   - GlobalSecondaryIndex
+        # ImportSourceSpecification: ImportSourceSpecification
+        # KinesisStreamSpecification: KinesisStreamSpecification
+        # LocalSecondaryIndexes:
+        #   - LocalSecondaryIndex
+        # PointInTimeRecoverySpecification: PointInTimeRecoverySpecification
+        # SSESpecification: SSESpecification
+        # StreamSpecification: StreamSpecification
+        # TableClass: String
+        # Tags:
+        #   - Tag
+    ### DynamoDB DAX Cluster
+    # MyDaxCluster:
+    #   Type: AWS::DAX::Cluster
+    #   Properties:
+    #     ClusterName: MyDaxCluster
+    #     IAMRoleARN: !GetAtt MyDaxRole.Arn
+    #     NodeType: t2.small
+    #     ReplicationFactor: 1
+    #     AvailabilityZones:
+    #       - String
+    #     ClusterEndpointEncryptionType: String
+    #     Description: String
+    #     NotificationTopicARN: String
+    #     ParameterGroupName: String
+    #     PreferredMaintenanceWindow: String
+    #     SecurityGroupIds:
+    #       - String
+    #     SSESpecification: SSESpecification
+    #     SubnetGroupName: String
+    #     Tags: Json
+    RdsDBCluster:
+      Type: "AWS::RDS::DBCluster"
+      Properties:
+        Engine: aurora-mysql
+        DBClusterIdentifier: my-aurora-cluster
+        EngineVersion: 5.7-compatible
+        MasterUsername: AN_AuroraDB
+        MasterUserPassword: "AnLab2023"
+        ServerlessV2ScalingConfiguration:
+          MinCapacity: 0.5
+          MaxCapacity: 1
+    RdsDBInstance:
+      Type: "AWS::RDS::DBInstance"
+      Properties:
+        Engine: aurora-mysql
+        DBInstanceClass: db.serverless
+        DBClusterIdentifier: my-aurora-instance
 functions:
   api:
     handler: server.handler
     events:
       # Using Amazon Aws Api Gateway v2 (HTTP API)
       # - httpApi:
-      #     method: GET
-      #     path: /api/hello
-      #     authorizer:
-      #       name: userAuthorization
-      # - httpApi:
-      #     method: GET
-      #     path: /api/log
-      #     authorizer:
-      #       name: userAuthorization
-      # - httpApi:
-      #     method: GET
-      #     path: /api/createS3Presigned
-      #     authorizer:
-      #       name: userAuthorization
-      # - httpApi:
-      #     method: POST
-      #     path: /api/queueSender
+      #     method: ANY
+      #     path: /api/privateEndpoint
       #     authorizer:
       #       name: userAuthorization
       - httpApi: "*"
@@ -115,7 +222,7 @@ package:
 
 custom:
   s3Sync:
-    - bucketName: next-static-site-assets
+    - bucketName: next-static-site-assets # TODO [AssetsBucket] use !Ref AssetsBucket instead of fixed bucket name
       localDir: .next/static
       bucketPrefix: _next/static/
   esbuild:
