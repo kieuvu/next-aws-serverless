@@ -2,9 +2,17 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { HttpMethod } from "../_utils/HttpMethod";
 import { AuthMiddleware } from "../_middleware/authMiddleware";
 
+type LogRequest = {};
+
+type LogResponse = {
+  status: boolean;
+  logMessage?: string;
+  message?: string;
+};
+
 async function handler(
   req: NextApiRequest,
-  res: NextApiResponse,
+  res: NextApiResponse<LogResponse>,
 ): Promise<any> {
   if (req.method != HttpMethod.GET)
     return res

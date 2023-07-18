@@ -2,16 +2,26 @@ import { NextApiRequest, NextApiResponse } from "next";
 import CognitoService from "../../_services/CognitoService";
 import { HttpMethod } from "../../_utils/HttpMethod";
 
+type RegisterRequest = {
+  email: string;
+  password: string;
+};
+
+type RegisterResponse = {
+  status: boolean;
+  message?: string;
+};
+
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse,
+  res: NextApiResponse<RegisterResponse>,
 ): Promise<void> {
   if (req.method != HttpMethod.POST)
     return res
       .status(405)
       .json({ status: false, message: "Method Not Allowed" });
 
-  const { email, password } = JSON.parse(req.body);
+  const { email, password } = <RegisterRequest>JSON.parse(req.body);
 
   const result: boolean = await CognitoService.register(email, password);
 

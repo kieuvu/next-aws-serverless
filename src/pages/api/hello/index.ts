@@ -3,9 +3,16 @@ import { HttpMethod } from "../_utils/HttpMethod";
 import { AuthMiddleware } from "../_middleware/authMiddleware";
 import Env from "../_utils/Env";
 
+type HelloRequest = {};
+
+type HelloResponse = {
+  status: boolean;
+  message: string;
+};
+
 async function handler(
   req: NextApiRequest,
-  res: NextApiResponse,
+  res: NextApiResponse<HelloResponse>,
 ): Promise<void> {
   if (req.method != HttpMethod.GET)
     return res
