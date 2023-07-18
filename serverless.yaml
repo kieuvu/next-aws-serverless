@@ -45,6 +45,8 @@ provider:
             - dynamodb:PutItem
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
+            #S3
+            - s3:*
           Resource: "*"
 
 resources:
@@ -97,7 +99,7 @@ resources:
             - Effect: Allow
               Principal: "*"
               Action: s3:GetObject
-              Resource: !Sub "arn:aws:s3:::${AssetsBucket}/*"
+              Resource: !Sub "${AssetsBucket.Arn}/*"
     UserPool:
       Type: AWS::Cognito::UserPool
       Properties:
