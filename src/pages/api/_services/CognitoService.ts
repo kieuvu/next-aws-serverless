@@ -1,4 +1,4 @@
-import AWS from "aws-sdk";
+import { AWSError } from "aws-sdk";
 import {
   AdminCreateUserCommandOutput,
   AdminInitiateAuthCommandOutput,
@@ -105,7 +105,7 @@ export default class CognitoService {
       delete response.AuthenticationResult?.IdToken; // if is not admin (prevent to access user details)
       return response.AuthenticationResult;
     } catch (error) {
-      const err: AWS.AWSError = <AWS.AWSError>error;
+      const err: AWSError = <AWSError>error;
       switch (err.code) {
         case "NotAuthorizedException":
           console.error("Incorrect username or password.");

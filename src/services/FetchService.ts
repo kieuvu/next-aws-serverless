@@ -57,7 +57,7 @@ export default class FetchService {
 
     if (this.method === "GET") {
       const params: string = new URLSearchParams(this.data).toString();
-      urlTemp += "?" + params;
+      urlTemp = params ? `${urlTemp}?${params}` : urlTemp;
     }
 
     if (this.method === "POST") {
