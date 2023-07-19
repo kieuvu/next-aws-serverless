@@ -28,7 +28,7 @@ export default async function handler(
   const { email, password } = <LoginRequest>JSON.parse(req.body);
 
   const credentials: boolean | AuthenticationResultType | undefined =
-    await CognitoService.login(email, password);
+    await CognitoService.authenticateUser(email, password);
 
   if (!credentials) {
     return res.status(401).json({

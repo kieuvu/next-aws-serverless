@@ -23,7 +23,7 @@ export default async function handler(
 
   const { email, password } = <RegisterRequest>JSON.parse(req.body);
 
-  const result: boolean = await CognitoService.register(email, password);
+  const result: boolean = await CognitoService.createUser(email, password);
 
   if (!result) {
     return res.status(400).json({

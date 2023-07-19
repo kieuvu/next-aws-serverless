@@ -50,7 +50,7 @@ export default class CognitoService {
     }
   }
 
-  public static async register(
+  public static async createUser(
     email: string,
     password: string,
   ): Promise<boolean> {
@@ -86,7 +86,7 @@ export default class CognitoService {
     }
   }
 
-  public static async login(
+  public static async authenticateUser(
     email: string,
     password: string,
   ): Promise<AuthenticationResultType | boolean | undefined> {
@@ -105,7 +105,7 @@ export default class CognitoService {
       delete response.AuthenticationResult?.IdToken; // if is not admin (prevent to access user details)
       return response.AuthenticationResult;
     } catch (error) {
-      const err = error as AWS.AWSError;
+      const err: AWS.AWSError = <AWS.AWSError>error;
       switch (err.code) {
         case "NotAuthorizedException":
           console.error("Incorrect username or password.");
