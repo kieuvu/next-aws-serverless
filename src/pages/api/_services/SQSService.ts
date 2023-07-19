@@ -1,27 +1,30 @@
 import {
   SQSClient,
   SendMessageCommand,
+  SendMessageCommandInput,
   SendMessageCommandOutput,
 } from "@aws-sdk/client-sqs";
-import { AwsClientConfig, AwsConfig } from "../_configs/AwsConfig";
+import {
+  AwsClientConfig as configuration,
+  AwsConfig,
+} from "../_configs/AwsConfig";
 
 export default class SQSService {
   private static queueUrl: string = AwsConfig.queueUrl;
+  private static clientInstance: SQSClient = new SQSClient(configuration);
 
-  public static getSQSInstance(): SQSClient {
-    return new SQSClient(AwsClientConfig);
-  }
-
-  public static async sendQueue(body: any): Promise<boolean> {
+  public static async sendQueue(value: any): Promise<boolean> {
     try {
+      const input: SendMessageCommandInput = {
+        MessageBody: JSON.stringify(value),
+        QueueUrl: SQSService.queueUrl,
+      };
+      const command: SendMessageCommand = new SendMessageCommand(input);
+
       const data: SendMessageCommandOutput =
-        await SQSService.getSQSInstance().send(
-          new SendMessageCommand({
-            MessageBody: JSON.stringify(body),
-            QueueUrl: SQSService.queueUrl,
-          }),
-        );
-      console.log("data sent info:", data);
+        await SQSService.clientInstance.send(command);
+
+      console.log("Queue sent", data);
       return true;
     } catch (err) {
       return false;
