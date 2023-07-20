@@ -2,32 +2,46 @@ service: serverless-next
 
 useDotenv: true
 
+####################################### Provider #######################################
 provider:
   name: aws
   runtime: nodejs16.x
   region: us-east-1
+  #################################
+  ##        Environment          ##
+  #################################
   environment:
     USER_POOL: !Ref UserPool
     AWS_BUCKET: !Ref Storage
     USER_POOL_CLIENT: !Ref UserClient
     DYNAMODB_TABLE_NAME: !Ref MyDynamoDbTable
-    ### DynamoDB DAX Endpoint Variable
     # DYNAMODB_DAX_ENDPOINT: !GetAtt MyDaxCluster.ClusterDiscoveryEndpoint
     APP_ENV: ${sls:stage}
     AWS_SQS_URL: ${construct:jobs.queueUrl}
     AMAZON_AWS_DEFAULT_REGION: ${self:provider.region}
     AWS_STATIC_BUCKET: next-static-site-assets # TODO [AssetsBucket] use !Ref AssetsBucket instead of fixed bucket name
-  ### Auth Middleware
+
+  #################################
+  ##        Auth Middleware      ##
+  #################################
   # httpApi:
   #   authorizers:
   #     userAuthorization:
   #       identitySource: $request.header.Authorization
   #       issuerUrl: { "Fn::Join": ["", ["https://cognito-idp.us-east-1.amazonaws.com/", !Ref UserPool]] }
   #       audience: !Ref UserClient
+
+  #################################
+  ##        API Gateway          ##
+  #################################
   apiGateway:
     shouldStartNameWithService: true
     binaryMediaTypes:
       - "*/*"
+
+  #################################
+  ##        IAM Role             ##
+  #################################
   iam:
     role:
       statements:
@@ -49,9 +63,106 @@ provider:
             - s3:*
           Resource: "*"
 
+  #################################
+  ##            VPC              ##
+  #################################
+  vpc:
+    securityGroupIds:
+      - Fn::GetAtt: [DatabaseVpcSecurityGroup, GroupId]
+    subnetIds:
+      - Ref: PrivateSubnet
+
+####################################### Resource #######################################
 resources:
   Resources:
-    ### DynamoDB DAX IAM Role
+    #################################
+    ##            VPC              ##
+    #################################
+    VPC:
+      Type: AWS::EC2::VPC
+      Properties:
+        CidrBlock: 10.0.0.0/16
+        InstanceTenancy: default
+
+    #################################
+    ##       Private Subnet        ##
+    #################################
+    PrivateSubnet:
+      Type: AWS::EC2::Subnet
+      Properties:
+        AvailabilityZone: ${self:provider.region}
+        CidrBlock: 10.0.8.0/24
+        VpcId:
+          Ref: VPC
+
+    #################################
+    ##     S3 Function Storage     ##
+    #################################
+    Storage:
+      Type: AWS::S3::Bucket
+
+    #################################
+    ##     S3 Assets Storage       ##
+    #################################
+    AssetsBucket:
+      Type: AWS::S3::Bucket
+      Properties: # TODO [AssetsBucket]: Remove to use auto generated bucket name
+        BucketName: next-static-site-assets # TODO [AssetsBucket]: Remove to use auto generated bucket name
+        CorsConfiguration:
+          CorsRules:
+            - AllowedMethods:
+                - GET
+                - HEAD
+              AllowedOrigins:
+                - "*"
+
+    #################################
+    ##    S3 Assets Storage Policy ##
+    #################################
+    AssetsBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref AssetsBucket
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal: "*"
+              Action: s3:GetObject
+              Resource: !Sub "${AssetsBucket.Arn}/*"
+
+    #################################
+    ##    Cognito User Pool        ##
+    #################################
+    UserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: ${self:service}-pool-${sls:stage}
+        Schema:
+          - Name: email
+            Required: true
+            Mutable: true
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 6
+        AutoVerifiedAttributes: ["email"]
+
+    #################################
+    ##    Cognito User Client      ##
+    #################################
+    UserClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: ${self:service}-client-${sls:stage}
+        GenerateSecret: false
+        UserPoolId: !Ref UserPool
+        AccessTokenValidity: 5
+        IdTokenValidity: 5
+        ExplicitAuthFlows:
+          - "ADMIN_NO_SRP_AUTH"
+
+    #################################
+    ##        DynamoDB DAX Role    ##
+    #################################
     # MyDaxRole:
     #   Type: AWS::IAM::Role
     #   Properties:
@@ -77,51 +188,10 @@ resources:
     #     PermissionsBoundary: String
     #     Tags:
     #       - Tag
-    Storage:
-      Type: AWS::S3::Bucket
-    AssetsBucket:
-      Type: AWS::S3::Bucket
-      Properties: # TODO [AssetsBucket]: Remove to use auto generated bucket name
-        BucketName: next-static-site-assets # TODO [AssetsBucket]: Remove to use auto generated bucket name
-        CorsConfiguration:
-          CorsRules:
-            - AllowedMethods:
-                - GET
-                - HEAD
-              AllowedOrigins:
-                - "*"
-    AssetsBucketPolicy:
-      Type: AWS::S3::BucketPolicy
-      Properties:
-        Bucket: !Ref AssetsBucket
-        PolicyDocument:
-          Statement:
-            - Effect: Allow
-              Principal: "*"
-              Action: s3:GetObject
-              Resource: !Sub "${AssetsBucket.Arn}/*"
-    UserPool:
-      Type: AWS::Cognito::UserPool
-      Properties:
-        UserPoolName: ${self:service}-pool-${sls:stage}
-        Schema:
-          - Name: email
-            Required: true
-            Mutable: true
-        Policies:
-          PasswordPolicy:
-            MinimumLength: 6
-        AutoVerifiedAttributes: ["email"]
-    UserClient:
-      Type: AWS::Cognito::UserPoolClient
-      Properties:
-        ClientName: ${self:service}-client-${sls:stage}
-        GenerateSecret: false
-        UserPoolId: !Ref UserPool
-        AccessTokenValidity: 5
-        IdTokenValidity: 5
-        ExplicitAuthFlows:
-          - "ADMIN_NO_SRP_AUTH"
+
+    #################################
+    ##        DynamoDB DAX Table   ##
+    #################################
     MyDynamoDbTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -153,7 +223,10 @@ resources:
         # TableClass: String
         # Tags:
         #   - Tag
-    ### DynamoDB DAX Cluster
+
+    #################################
+    ##        DynamoDB DAX Cluster ##
+    #################################
     # MyDaxCluster:
     #   Type: AWS::DAX::Cluster
     #   Properties:
@@ -173,24 +246,68 @@ resources:
     #     SSESpecification: SSESpecification
     #     SubnetGroupName: String
     #     Tags: Json
+
+    #################################
+    ##        DB Subnet Group      ##
+    #################################
+    DBSubnetGroup:
+      Type: "AWS::RDS::DBSubnetGroup"
+      Properties:
+        DBSubnetGroupDescription: "DB Subnet Group"
+        SubnetIds:
+          - Ref: PrivateSubnet
+
+    #################################
+    ##     DB VPC Security Group   ##
+    #################################
+    DatabaseVpcSecurityGroup:
+      Type: "AWS::EC2::SecurityGroup"
+      Properties:
+        GroupName: DBSecurityGroup
+        GroupDescription: "Allow Local Access"
+        SecurityGroupIngress:
+          - CidrIp: 10.0.0.0/16
+            IpProtocol: tcp
+            FromPort: 3306
+            ToPort: 3306
+        VpcId:
+          Ref: VPC
+
+    #################################
+    ##        RDS Aurora Cluster   ##
+    #################################
     RdsDBCluster:
       Type: "AWS::RDS::DBCluster"
       Properties:
         Engine: aurora-mysql
         DBClusterIdentifier: my-aurora-cluster
-        EngineVersion: 5.7-compatible
+        EngineVersion: 8.0.mysql_aurora.3.03.1
         MasterUsername: AN_AuroraDB
         MasterUserPassword: "AnLab2023"
         ServerlessV2ScalingConfiguration:
           MinCapacity: 0.5
           MaxCapacity: 1
+        DBSubnetGroupName:
+          Ref: DBSubnetGroup
+        VpcSecurityGroupIds:
+          - Ref: DatabaseVpcSecurityGroup
+
+    #################################
+    ##        RDS Aurora Instance  ##
+    #################################
     RdsDBInstance:
       Type: "AWS::RDS::DBInstance"
       Properties:
         Engine: aurora-mysql
         DBInstanceClass: db.serverless
-        DBClusterIdentifier: my-aurora-instance
+        DBClusterIdentifier: !Ref RdsDBCluster
+        PubliclyAccessible: true
+
+####################################### Functions #######################################
 functions:
+  #################################
+  ##        Next App Function    ##
+  #################################
   api:
     handler: server.handler
     events:
@@ -205,12 +322,14 @@ functions:
       # - http: ANY /
       # - http: ANY /{proxy+}
 
+####################################### Plugin #######################################
 plugins:
   - serverless-esbuild
   - serverless-dotenv-plugin
   - serverless-lift
   - serverless-s3-sync
 
+####################################### Package #######################################
 package:
   individually: true
   patterns:
@@ -222,17 +341,29 @@ package:
     - "next-i18next.config.js"
     - "package.json"
 
+####################################### Custom #######################################
 custom:
+  #################################
+  ##        Upload Assets To S3  ##
+  #################################
   s3Sync:
     - bucketName: next-static-site-assets # TODO [AssetsBucket] use !Ref AssetsBucket instead of fixed bucket name
       localDir: .next/static
       bucketPrefix: _next/static/
+
+  #################################
+  ##        Build Option         ##
+  #################################
   esbuild:
     bundle: true
     minify: true
     exclude: "*"
     external:
       - "next"
+
+  #################################
+  ##        Import .env Value    ##
+  #################################
   dotenv:
     include:
       - AMAZON_AWS_ACCESS_KEY_ID
@@ -242,7 +373,11 @@ custom:
         - AMAZON_AWS_ACCESS_KEY_ID
         - AMAZON_AWS_ACCESS_KEY_SECRET
 
+####################################### Construct #######################################
 constructs:
+  #################################
+  ##        Job Handler          ##
+  #################################
   jobs:
     type: queue
     worker:
