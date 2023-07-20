@@ -88,6 +88,12 @@ resources:
       Properties:
         CidrBlock: 10.0.0.0/16
         InstanceTenancy: default
+        # EnableDnsHostnames: Boolean
+        # EnableDnsSupport: Boolean
+        # Ipv4IpamPoolId: String
+        # Ipv4NetmaskLength: Integer
+        # Tags:
+        #   - Tag
 
     #-------------------------------#
     #        2.2.Private Subnet     #
@@ -99,12 +105,61 @@ resources:
         CidrBlock: 10.0.8.0/24
         VpcId:
           Ref: VPC
+        # AssignIpv6AddressOnCreation: Boolean
+        # AvailabilityZoneId: String
+        # EnableDns64: Boolean
+        # Ipv6CidrBlock: String
+        # Ipv6Native: Boolean
+        # MapPublicIpOnLaunch: Boolean
+        # OutpostArn: String
+        # PrivateDnsNameOptionsOnLaunch:
+        #   PrivateDnsNameOptionsOnLaunch
+        # Tags:
+        #   - Tag
 
     #-------------------------------#
     #    2.3.S3 Function Storage    #
     #-------------------------------#
     Storage:
       Type: AWS::S3::Bucket
+      # Properties:
+      # AccelerateConfiguration:
+      #   AccelerateConfiguration
+      # AccessControl: String
+      # AnalyticsConfigurations:
+      #   - AnalyticsConfiguration
+      # BucketEncryption:
+      #   BucketEncryption
+      # BucketName: String
+      # CorsConfiguration:
+      #   CorsConfiguration
+      # IntelligentTieringConfigurations:
+      #   - IntelligentTieringConfiguration
+      # InventoryConfigurations:
+      #   - InventoryConfiguration
+      # LifecycleConfiguration:
+      #   LifecycleConfiguration
+      # LoggingConfiguration:
+      #   LoggingConfiguration
+      # MetricsConfigurations:
+      #   - MetricsConfiguration
+      # NotificationConfiguration:
+      #   NotificationConfiguration
+      # ObjectLockConfiguration:
+      #   ObjectLockConfiguration
+      # ObjectLockEnabled: Boolean
+      # OwnershipControls:
+      #   OwnershipControls
+      # PublicAccessBlockConfiguration:
+      #   PublicAccessBlockConfiguration
+      # ReplicationConfiguration:
+      #   ReplicationConfiguration
+      # Tags:
+      #   - Tag
+      # VersioningConfiguration:
+      #   VersioningConfiguration
+      # WebsiteConfiguration:
+      #   WebsiteConfiguration
 
     #-------------------------------#
     #      2.4.S3 Assets Storage    #
@@ -120,6 +175,40 @@ resources:
                 - HEAD
               AllowedOrigins:
                 - "*"
+      # AccelerateConfiguration:
+      #   AccelerateConfiguration
+      # AccessControl: String
+      # AnalyticsConfigurations:
+      #   - AnalyticsConfiguration
+      # BucketEncryption:
+      #   BucketEncryption
+      # IntelligentTieringConfigurations:
+      #   - IntelligentTieringConfiguration
+      # InventoryConfigurations:
+      #   - InventoryConfiguration
+      # LifecycleConfiguration:
+      #   LifecycleConfiguration
+      # LoggingConfiguration:
+      #   LoggingConfiguration
+      # MetricsConfigurations:
+      #   - MetricsConfiguration
+      # NotificationConfiguration:
+      #   NotificationConfiguration
+      # ObjectLockConfiguration:
+      #   ObjectLockConfiguration
+      # ObjectLockEnabled: Boolean
+      # OwnershipControls:
+      #   OwnershipControls
+      # PublicAccessBlockConfiguration:
+      #   PublicAccessBlockConfiguration
+      # ReplicationConfiguration:
+      #   ReplicationConfiguration
+      # Tags:
+      #   - Tag
+      # VersioningConfiguration:
+      #   VersioningConfiguration
+      # WebsiteConfiguration:
+      #   WebsiteConfiguration
 
     #-------------------------------#
     #  2.5.S3 Assets Bucket Policy  #
@@ -150,6 +239,39 @@ resources:
           PasswordPolicy:
             MinimumLength: 6
         AutoVerifiedAttributes: ["email"]
+        # AccountRecoverySetting:
+        #   AccountRecoverySetting
+        # AdminCreateUserConfig:
+        #   AdminCreateUserConfig
+        # AliasAttributes:
+        #   - String
+        # DeletionProtection: String
+        # DeviceConfiguration:
+        #   DeviceConfiguration
+        # EmailConfiguration:
+        #   EmailConfiguration
+        # EmailVerificationMessage: String
+        # EmailVerificationSubject: String
+        # EnabledMfas:
+        #   - String
+        # LambdaConfig:
+        #   LambdaConfig
+        # MfaConfiguration: String
+        # SmsAuthenticationMessage: String
+        # SmsConfiguration:
+        #   SmsConfiguration
+        # SmsVerificationMessage: String
+        # UserAttributeUpdateSettings:
+        #   UserAttributeUpdateSettings
+        # UsernameAttributes:
+        #   - String
+        # UsernameConfiguration:
+        #   UsernameConfiguration
+        # UserPoolAddOns:
+        #   UserPoolAddOns
+        # UserPoolTags: Json
+        # VerificationMessageTemplate:
+        #   VerificationMessageTemplate
 
     #-------------------------------#
     #     2.7.Cognito User Client   #
@@ -164,6 +286,31 @@ resources:
         IdTokenValidity: 5
         ExplicitAuthFlows:
           - "ADMIN_NO_SRP_AUTH"
+        # AllowedOAuthFlows:
+        #   - String
+        # AllowedOAuthFlowsUserPoolClient: Boolean
+        # AllowedOAuthScopes:
+        #   - String
+        # AnalyticsConfiguration:
+        #   AnalyticsConfiguration
+        # AuthSessionValidity: Integer
+        # CallbackURLs:
+        #   - String
+        # DefaultRedirectURI: String
+        # EnablePropagateAdditionalUserContextData: Boolean
+        # EnableTokenRevocation: Boolean
+        # LogoutURLs:
+        #   - String
+        # PreventUserExistenceErrors: String
+        # ReadAttributes:
+        #   - String
+        # RefreshTokenValidity: Integer
+        # SupportedIdentityProviders:
+        #   - String
+        # TokenValidityUnits:
+        #   TokenValidityUnits
+        # WriteAttributes:
+        #   - String
 
     #-------------------------------#
     #    2.8.DynamoDB DAX Role      #
@@ -261,6 +408,7 @@ resources:
         DBSubnetGroupDescription: "DB Subnet Group"
         SubnetIds:
           - Ref: PrivateSubnet
+        # DBSubnetGroupName: String
 
     #-------------------------------#
     #  2.12.DB VPC Security Group   #
@@ -297,6 +445,56 @@ resources:
           Ref: DBSubnetGroup
         VpcSecurityGroupIds:
           - Ref: DatabaseVpcSecurityGroup
+        # AllocatedStorage: Integer
+        # AssociatedRoles:
+        #   - DBClusterRole
+        # AutoMinorVersionUpgrade: Boolean
+        # AvailabilityZones:
+        #   - String
+        # BacktrackWindow: Integer
+        # BackupRetentionPeriod: Integer
+        # CopyTagsToSnapshot: Boolean
+        # DBClusterInstanceClass: String
+        # DBClusterParameterGroupName: String
+        # DBInstanceParameterGroupName: String
+        # DBSystemId: String
+        # DeletionProtection: Boolean
+        # Domain: String
+        # DomainIAMRoleName: String
+        # EnableCloudwatchLogsExports:
+        #   - String
+        # EnableHttpEndpoint: Boolean
+        # EnableIAMDatabaseAuthentication: Boolean
+        # EngineMode: String
+        # GlobalClusterIdentifier: String
+        # Iops: Integer
+        # KmsKeyId: String
+        # ManageMasterUserPassword: Boolean
+        # MasterUserSecret:
+        #   MasterUserSecret
+        # MonitoringInterval: Integer
+        # MonitoringRoleArn: String
+        # NetworkType: String
+        # PerformanceInsightsEnabled: Boolean
+        # PerformanceInsightsKmsKeyId: String
+        # PerformanceInsightsRetentionPeriod: Integer
+        # Port: Integer
+        # PreferredBackupWindow: String
+        # PreferredMaintenanceWindow: String
+        # PubliclyAccessible: Boolean
+        # ReplicationSourceIdentifier: String
+        # RestoreToTime: String
+        # RestoreType: String
+        # ScalingConfiguration:
+        #   ScalingConfiguration
+        # SnapshotIdentifier: String
+        # SourceDBClusterIdentifier: String
+        # SourceRegion: String
+        # StorageEncrypted: Boolean
+        # StorageType: String
+        # Tags:
+        #   - Tag
+        # UseLatestRestorableTime: Boolean
 
     #-------------------------------#
     #    2.14.RDS Aurora Instance   #
@@ -308,6 +506,79 @@ resources:
         DBInstanceClass: db.serverless
         DBClusterIdentifier: !Ref RdsDBCluster
         PubliclyAccessible: true
+        # AllocatedStorage: String
+        # AllowMajorVersionUpgrade: Boolean
+        # AssociatedRoles:
+        #   - DBInstanceRole
+        # AutoMinorVersionUpgrade: Boolean
+        # AvailabilityZone: String
+        # BackupRetentionPeriod: Integer
+        # CACertificateIdentifier: String
+        # CertificateDetails:
+        #   CertificateDetails
+        # CertificateRotationRestart: Boolean
+        # CharacterSetName: String
+        # CopyTagsToSnapshot: Boolean
+        # CustomIAMInstanceProfile: String
+        # DBClusterSnapshotIdentifier: String
+        # DBInstanceIdentifier: String
+        # DBName: String
+        # DBParameterGroupName: String
+        # DBSecurityGroups:
+        #   - String
+        # DBSnapshotIdentifier: String
+        # DBSubnetGroupName: String
+        # DeleteAutomatedBackups: Boolean
+        # DeletionProtection: Boolean
+        # Domain: String
+        # DomainIAMRoleName: String
+        # EnableCloudwatchLogsExports:
+        #   - String
+        # EnableIAMDatabaseAuthentication: Boolean
+        # EnablePerformanceInsights: Boolean
+        # Endpoint:
+        #   Endpoint
+        # EngineVersion: String
+        # Iops: Integer
+        # KmsKeyId: String
+        # LicenseModel: String
+        # ManageMasterUserPassword: Boolean
+        # MasterUsername: String
+        # MasterUserPassword: String
+        # MasterUserSecret:
+        #   MasterUserSecret
+        # MaxAllocatedStorage: Integer
+        # MonitoringInterval: Integer
+        # MonitoringRoleArn: String
+        # MultiAZ: Boolean
+        # NcharCharacterSetName: String
+        # NetworkType: String
+        # OptionGroupName: String
+        # PerformanceInsightsKMSKeyId: String
+        # PerformanceInsightsRetentionPeriod: Integer
+        # Port: String
+        # PreferredBackupWindow: String
+        # PreferredMaintenanceWindow: String
+        # ProcessorFeatures:
+        #   - ProcessorFeature
+        # PromotionTier: Integer
+        # ReplicaMode: String
+        # RestoreTime: String
+        # SourceDBClusterIdentifier: String
+        # SourceDBInstanceAutomatedBackupsArn: String
+        # SourceDBInstanceIdentifier: String
+        # SourceDbiResourceId: String
+        # SourceRegion: String
+        # StorageEncrypted: Boolean
+        # StorageThroughput: Integer
+        # StorageType: String
+        # Tags:
+        #   - Tag
+        # Timezone: String
+        # UseDefaultProcessorFeatures: Boolean
+        # UseLatestRestorableTime: Boolean
+        # VPCSecurityGroups:
+        #   - String
 
 #------------------------------------------ 3.Functions -----------------------------------------#
 functions:
