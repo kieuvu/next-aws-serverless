@@ -2,13 +2,14 @@ service: serverless-next
 
 useDotenv: true
 
-####################################### Provider #######################################
+####################################### 1.Provider #######################################
 provider:
   name: aws
   runtime: nodejs16.x
   region: us-east-1
+
   #################################
-  ##        Environment          ##
+  ##        1.1.Environment      ##
   #################################
   environment:
     USER_POOL: !Ref UserPool
@@ -20,9 +21,12 @@ provider:
     AWS_SQS_URL: ${construct:jobs.queueUrl}
     AMAZON_AWS_DEFAULT_REGION: ${self:provider.region}
     AWS_STATIC_BUCKET: next-static-site-assets # TODO [AssetsBucket] use !Ref AssetsBucket instead of fixed bucket name
+    DATABASE_NAME: ${self:custom.DBName}
+    DATABASE_USERNAME: ${self:custom.DBUserName}
+    DATABASE_PASSWORD: ${self:custom.DBPassword}
 
   #################################
-  ##        Auth Middleware      ##
+  ##      1.2.Auth Middleware    ##
   #################################
   # httpApi:
   #   authorizers:
@@ -32,7 +36,7 @@ provider:
   #       audience: !Ref UserClient
 
   #################################
-  ##        API Gateway          ##
+  ##        1.3.API Gateway      ##
   #################################
   apiGateway:
     shouldStartNameWithService: true
@@ -40,7 +44,7 @@ provider:
       - "*/*"
 
   #################################
-  ##        IAM Role             ##
+  ##        1.4.IAM Role         ##
   #################################
   iam:
     role:
@@ -64,7 +68,7 @@ provider:
           Resource: "*"
 
   #################################
-  ##            VPC              ##
+  ##            1.5.VPC          ##
   #################################
   vpc:
     securityGroupIds:
@@ -72,11 +76,11 @@ provider:
     subnetIds:
       - Ref: PrivateSubnet
 
-####################################### Resource #######################################
+####################################### 2.Resource #######################################
 resources:
   Resources:
     #################################
-    ##            VPC              ##
+    ##            2.1.VPC          ##
     #################################
     VPC:
       Type: AWS::EC2::VPC
@@ -85,7 +89,7 @@ resources:
         InstanceTenancy: default
 
     #################################
-    ##       Private Subnet        ##
+    ##       2.2.Private Subnet    ##
     #################################
     PrivateSubnet:
       Type: AWS::EC2::Subnet
@@ -96,13 +100,13 @@ resources:
           Ref: VPC
 
     #################################
-    ##     S3 Function Storage     ##
+    ##   2.3.S3 Function Storage   ##
     #################################
     Storage:
       Type: AWS::S3::Bucket
 
     #################################
-    ##     S3 Assets Storage       ##
+    ##     2.4.S3 Assets Storage   ##
     #################################
     AssetsBucket:
       Type: AWS::S3::Bucket
@@ -117,7 +121,7 @@ resources:
                 - "*"
 
     #################################
-    ##    S3 Assets Storage Policy ##
+    ## 2.5.S3 Assets Bucket Policy ##
     #################################
     AssetsBucketPolicy:
       Type: AWS::S3::BucketPolicy
@@ -131,7 +135,7 @@ resources:
               Resource: !Sub "${AssetsBucket.Arn}/*"
 
     #################################
-    ##    Cognito User Pool        ##
+    ##    2.6.Cognito User Pool    ##
     #################################
     UserPool:
       Type: AWS::Cognito::UserPool
@@ -147,7 +151,7 @@ resources:
         AutoVerifiedAttributes: ["email"]
 
     #################################
-    ##    Cognito User Client      ##
+    ##    2.7.Cognito User Client  ##
     #################################
     UserClient:
       Type: AWS::Cognito::UserPoolClient
@@ -161,7 +165,7 @@ resources:
           - "ADMIN_NO_SRP_AUTH"
 
     #################################
-    ##        DynamoDB DAX Role    ##
+    ##    2.8.DynamoDB DAX Role    ##
     #################################
     # MyDaxRole:
     #   Type: AWS::IAM::Role
@@ -190,7 +194,7 @@ resources:
     #       - Tag
 
     #################################
-    ##        DynamoDB DAX Table   ##
+    ##    2.9.DynamoDB DAX Table   ##
     #################################
     MyDynamoDbTable:
       Type: AWS::DynamoDB::Table
@@ -225,7 +229,7 @@ resources:
         #   - Tag
 
     #################################
-    ##        DynamoDB DAX Cluster ##
+    ##   2.10.DynamoDB DAX Cluster ##
     #################################
     # MyDaxCluster:
     #   Type: AWS::DAX::Cluster
@@ -248,7 +252,7 @@ resources:
     #     Tags: Json
 
     #################################
-    ##        DB Subnet Group      ##
+    ##   2.11.DB Subnet Group      ##
     #################################
     DBSubnetGroup:
       Type: "AWS::RDS::DBSubnetGroup"
@@ -258,7 +262,7 @@ resources:
           - Ref: PrivateSubnet
 
     #################################
-    ##     DB VPC Security Group   ##
+    ## 2.12.DB VPC Security Group  ##
     #################################
     DatabaseVpcSecurityGroup:
       Type: "AWS::EC2::SecurityGroup"
@@ -274,16 +278,17 @@ resources:
           Ref: VPC
 
     #################################
-    ##        RDS Aurora Cluster   ##
+    ##   2.13.RDS Aurora Cluster   ##
     #################################
     RdsDBCluster:
       Type: "AWS::RDS::DBCluster"
       Properties:
         Engine: aurora-mysql
+        DatabaseName: ${self:custom.DBName}
         DBClusterIdentifier: my-aurora-cluster
         EngineVersion: 8.0.mysql_aurora.3.03.1
-        MasterUsername: AN_AuroraDB
-        MasterUserPassword: "AnLab2023"
+        MasterUsername: ${self:custom.DBUserName}
+        MasterUserPassword: ${self:custom.DBPassword}
         ServerlessV2ScalingConfiguration:
           MinCapacity: 0.5
           MaxCapacity: 1
@@ -293,7 +298,7 @@ resources:
           - Ref: DatabaseVpcSecurityGroup
 
     #################################
-    ##        RDS Aurora Instance  ##
+    ##   2.14.RDS Aurora Instance  ##
     #################################
     RdsDBInstance:
       Type: "AWS::RDS::DBInstance"
@@ -303,10 +308,10 @@ resources:
         DBClusterIdentifier: !Ref RdsDBCluster
         PubliclyAccessible: true
 
-####################################### Functions #######################################
+####################################### 3.Functions #######################################
 functions:
   #################################
-  ##        Next App Function    ##
+  ##    3.1.Next App Function    ##
   #################################
   api:
     handler: server.handler
@@ -322,14 +327,14 @@ functions:
       # - http: ANY /
       # - http: ANY /{proxy+}
 
-####################################### Plugin #######################################
+####################################### 4.Plugin #######################################
 plugins:
   - serverless-esbuild
   - serverless-dotenv-plugin
   - serverless-lift
   - serverless-s3-sync
 
-####################################### Package #######################################
+####################################### 5.Package #######################################
 package:
   individually: true
   patterns:
@@ -341,10 +346,17 @@ package:
     - "next-i18next.config.js"
     - "package.json"
 
-####################################### Custom #######################################
+####################################### 6.Custom #######################################
 custom:
   #################################
-  ##        Upload Assets To S3  ##
+  ##    6.1.Database Info        ##
+  #################################
+  DBName: "AnLabDB"
+  DBUserName: "AN_AuroraDB"
+  DBPassword: "AnLab2023"
+
+  #################################
+  ##    6.2.Upload Assets To S3  ##
   #################################
   s3Sync:
     - bucketName: next-static-site-assets # TODO [AssetsBucket] use !Ref AssetsBucket instead of fixed bucket name
@@ -352,7 +364,7 @@ custom:
       bucketPrefix: _next/static/
 
   #################################
-  ##        Build Option         ##
+  ##    6.3.Build Option         ##
   #################################
   esbuild:
     bundle: true
@@ -362,7 +374,7 @@ custom:
       - "next"
 
   #################################
-  ##        Import .env Value    ##
+  ##    6.4.Import .env Value    ##
   #################################
   dotenv:
     include:
@@ -373,10 +385,10 @@ custom:
         - AMAZON_AWS_ACCESS_KEY_ID
         - AMAZON_AWS_ACCESS_KEY_SECRET
 
-####################################### Construct #######################################
+####################################### 5.Construct #######################################
 constructs:
   #################################
-  ##        Job Handler          ##
+  ##       5.1.Job Handler       ##
   #################################
   jobs:
     type: queue
