@@ -12,19 +12,20 @@ provider:
   #         1.1.Environment       #
   #-------------------------------#
   environment:
-    USER_POOL: !Ref UserPool
-    AWS_BUCKET: !Ref Storage
-    USER_POOL_CLIENT: !Ref UserClient
-    DYNAMODB_TABLE_NAME: !Ref MyDynamoDbTable
-    # DYNAMODB_DAX_ENDPOINT: !GetAtt MyDaxCluster.ClusterDiscoveryEndpoint
     APP_ENV: ${sls:stage}
+    AWS_BUCKET: !Ref Storage
     AWS_SQS_URL: ${construct:jobs.queueUrl}
+    USER_POOL: !Ref UserPool
+    USER_POOL_CLIENT: !Ref UserClient
     AMAZON_AWS_DEFAULT_REGION: ${self:provider.region}
-    AWS_STATIC_BUCKET: next-static-site-assets # TODO [AssetsBucket] use !Ref AssetsBucket instead of fixed bucket name
-    DATABASE_URL: { Fn::GetAtt: [RdsDBCluster, Endpoint.Address] }
-    DATABASE_NAME: ${self:custom.DBName}
-    DATABASE_USERNAME: ${self:custom.DBUserName}
-    DATABASE_PASSWORD: ${self:custom.DBPassword}
+    AWS_STATIC_BUCKET: next-static-site-assets
+    DYNAMODB_TABLE_NAME: !Ref MyDynamoDbTable
+    AMAZON_AWS_ACCESS_KEY_ID: ${self:custom.AwsApiKey}
+    AMAZON_AWS_ACCESS_KEY_SECRET: ${self:custom.AwsSecretKey}
+    DB_URL: ${self:custom.DBUrl}
+    DB_NAME: ${self:custom.DBName}
+    DB_USERNAME: ${self:custom.DBUserName}
+    DB_PASSWORD: ${self:custom.DBPassword}
 
   #-------------------------------#
   #      1.2.Auth Middleware      #
@@ -56,7 +57,7 @@ provider:
             - cognito-idp:AdminInitiateAuth
             - cognito-idp:AdminCreateUser
             - cognito-idp:AdminSetUserPassword
-            # DynamoDb
+            # DynamoDB
             - dynamodb:DescribeTable
             - dynamodb:Query
             - dynamodb:Scan
@@ -64,168 +65,27 @@ provider:
             - dynamodb:PutItem
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
-            #S3
-            - s3:*
           Resource: "*"
-
-  #-------------------------------#
-  #             1.5.VPC           #
-  #-------------------------------#
-  vpc:
-    securityGroupIds:
-      - Fn::GetAtt: [DatabaseVpcSecurityGroup, GroupId]
-    subnetIds:
-      - Ref: PrivateSubnet
 
 #------------------------------------------ 2.Resource ------------------------------------------#
 resources:
   Resources:
     #-------------------------------#
-    #            2.1.VPC            #
-    #-------------------------------#
-    VPC:
-      Type: AWS::EC2::VPC
-      Properties:
-        CidrBlock: 10.0.0.0/16
-        InstanceTenancy: default
-        # EnableDnsHostnames: Boolean
-        # EnableDnsSupport: Boolean
-        # Ipv4IpamPoolId: String
-        # Ipv4NetmaskLength: Integer
-        # Tags:
-        #   - Tag
-
-    #-------------------------------#
-    #        2.2.Private Subnet     #
-    #-------------------------------#
-    PrivateSubnet:
-      Type: AWS::EC2::Subnet
-      Properties:
-        AvailabilityZone: ${self:provider.region}
-        CidrBlock: 10.0.8.0/24
-        VpcId:
-          Ref: VPC
-        # AssignIpv6AddressOnCreation: Boolean
-        # AvailabilityZoneId: String
-        # EnableDns64: Boolean
-        # Ipv6CidrBlock: String
-        # Ipv6Native: Boolean
-        # MapPublicIpOnLaunch: Boolean
-        # OutpostArn: String
-        # PrivateDnsNameOptionsOnLaunch:
-        #   PrivateDnsNameOptionsOnLaunch
-        # Tags:
-        #   - Tag
-
-    #-------------------------------#
-    #    2.3.S3 Function Storage    #
+    #    2.1.S3 Function Storage    #
     #-------------------------------#
     Storage:
       Type: AWS::S3::Bucket
-      # Properties:
-      # AccelerateConfiguration:
-      #   AccelerateConfiguration
-      # AccessControl: String
-      # AnalyticsConfigurations:
-      #   - AnalyticsConfiguration
-      # BucketEncryption:
-      #   BucketEncryption
-      # BucketName: String
-      # CorsConfiguration:
-      #   CorsConfiguration
-      # IntelligentTieringConfigurations:
-      #   - IntelligentTieringConfiguration
-      # InventoryConfigurations:
-      #   - InventoryConfiguration
-      # LifecycleConfiguration:
-      #   LifecycleConfiguration
-      # LoggingConfiguration:
-      #   LoggingConfiguration
-      # MetricsConfigurations:
-      #   - MetricsConfiguration
-      # NotificationConfiguration:
-      #   NotificationConfiguration
-      # ObjectLockConfiguration:
-      #   ObjectLockConfiguration
-      # ObjectLockEnabled: Boolean
-      # OwnershipControls:
-      #   OwnershipControls
-      # PublicAccessBlockConfiguration:
-      #   PublicAccessBlockConfiguration
-      # ReplicationConfiguration:
-      #   ReplicationConfiguration
-      # Tags:
-      #   - Tag
-      # VersioningConfiguration:
-      #   VersioningConfiguration
-      # WebsiteConfiguration:
-      #   WebsiteConfiguration
 
     #-------------------------------#
-    #      2.4.S3 Assets Storage    #
+    #      2.2.S3 Assets Storage    #
     #-------------------------------#
     AssetsBucket:
       Type: AWS::S3::Bucket
-      Properties: # TODO [AssetsBucket]: Remove to use auto generated bucket name
-        BucketName: next-static-site-assets # TODO [AssetsBucket]: Remove to use auto generated bucket name
-        CorsConfiguration:
-          CorsRules:
-            - AllowedMethods:
-                - GET
-                - HEAD
-              AllowedOrigins:
-                - "*"
-      # AccelerateConfiguration:
-      #   AccelerateConfiguration
-      # AccessControl: String
-      # AnalyticsConfigurations:
-      #   - AnalyticsConfiguration
-      # BucketEncryption:
-      #   BucketEncryption
-      # IntelligentTieringConfigurations:
-      #   - IntelligentTieringConfiguration
-      # InventoryConfigurations:
-      #   - InventoryConfiguration
-      # LifecycleConfiguration:
-      #   LifecycleConfiguration
-      # LoggingConfiguration:
-      #   LoggingConfiguration
-      # MetricsConfigurations:
-      #   - MetricsConfiguration
-      # NotificationConfiguration:
-      #   NotificationConfiguration
-      # ObjectLockConfiguration:
-      #   ObjectLockConfiguration
-      # ObjectLockEnabled: Boolean
-      # OwnershipControls:
-      #   OwnershipControls
-      # PublicAccessBlockConfiguration:
-      #   PublicAccessBlockConfiguration
-      # ReplicationConfiguration:
-      #   ReplicationConfiguration
-      # Tags:
-      #   - Tag
-      # VersioningConfiguration:
-      #   VersioningConfiguration
-      # WebsiteConfiguration:
-      #   WebsiteConfiguration
-
-    #-------------------------------#
-    #  2.5.S3 Assets Bucket Policy  #
-    #-------------------------------#
-    AssetsBucketPolicy:
-      Type: AWS::S3::BucketPolicy
       Properties:
-        Bucket: !Ref AssetsBucket
-        PolicyDocument:
-          Statement:
-            - Effect: Allow
-              Principal: "*"
-              Action: s3:GetObject
-              Resource: !Sub "${AssetsBucket.Arn}/*"
+        BucketName: next-static-site-assets
 
     #-------------------------------#
-    #     2.6.Cognito User Pool     #
+    #     2.3.Cognito User Pool     #
     #-------------------------------#
     UserPool:
       Type: AWS::Cognito::UserPool
@@ -239,42 +99,9 @@ resources:
           PasswordPolicy:
             MinimumLength: 6
         AutoVerifiedAttributes: ["email"]
-        # AccountRecoverySetting:
-        #   AccountRecoverySetting
-        # AdminCreateUserConfig:
-        #   AdminCreateUserConfig
-        # AliasAttributes:
-        #   - String
-        # DeletionProtection: String
-        # DeviceConfiguration:
-        #   DeviceConfiguration
-        # EmailConfiguration:
-        #   EmailConfiguration
-        # EmailVerificationMessage: String
-        # EmailVerificationSubject: String
-        # EnabledMfas:
-        #   - String
-        # LambdaConfig:
-        #   LambdaConfig
-        # MfaConfiguration: String
-        # SmsAuthenticationMessage: String
-        # SmsConfiguration:
-        #   SmsConfiguration
-        # SmsVerificationMessage: String
-        # UserAttributeUpdateSettings:
-        #   UserAttributeUpdateSettings
-        # UsernameAttributes:
-        #   - String
-        # UsernameConfiguration:
-        #   UsernameConfiguration
-        # UserPoolAddOns:
-        #   UserPoolAddOns
-        # UserPoolTags: Json
-        # VerificationMessageTemplate:
-        #   VerificationMessageTemplate
 
     #-------------------------------#
-    #     2.7.Cognito User Client   #
+    #     2.4.Cognito User Client   #
     #-------------------------------#
     UserClient:
       Type: AWS::Cognito::UserPoolClient
@@ -286,63 +113,9 @@ resources:
         IdTokenValidity: 5
         ExplicitAuthFlows:
           - "ADMIN_NO_SRP_AUTH"
-        # AllowedOAuthFlows:
-        #   - String
-        # AllowedOAuthFlowsUserPoolClient: Boolean
-        # AllowedOAuthScopes:
-        #   - String
-        # AnalyticsConfiguration:
-        #   AnalyticsConfiguration
-        # AuthSessionValidity: Integer
-        # CallbackURLs:
-        #   - String
-        # DefaultRedirectURI: String
-        # EnablePropagateAdditionalUserContextData: Boolean
-        # EnableTokenRevocation: Boolean
-        # LogoutURLs:
-        #   - String
-        # PreventUserExistenceErrors: String
-        # ReadAttributes:
-        #   - String
-        # RefreshTokenValidity: Integer
-        # SupportedIdentityProviders:
-        #   - String
-        # TokenValidityUnits:
-        #   TokenValidityUnits
-        # WriteAttributes:
-        #   - String
 
     #-------------------------------#
-    #    2.8.DynamoDB DAX Role      #
-    #-------------------------------#
-    # MyDaxRole:
-    #   Type: AWS::IAM::Role
-    #   Properties:
-    #     RoleName: my-dax-role
-    #     AssumeRolePolicyDocument:
-    #       Statement:
-    #         - Effect: Allow
-    #           Principal:
-    #             Service: dax.amazonaws.com
-    #           Action: sts:AssumeRole
-    #     Policies:
-    #       - PolicyName: dax-policy
-    #         PolicyDocument:
-    #           Statement:
-    #             - Effect: Allow
-    #               Action: dax:*
-    #               Resource: "*"
-    #     Description: String
-    #     ManagedPolicyArns:
-    #       - String
-    #     MaxSessionDuration: Integer
-    #     Path: String
-    #     PermissionsBoundary: String
-    #     Tags:
-    #       - Tag
-
-    #-------------------------------#
-    #    2.9.DynamoDB DAX Table     #
+    #    2.5.DynamoDB Table         #
     #-------------------------------#
     MyDynamoDbTable:
       Type: AWS::DynamoDB::Table
@@ -361,73 +134,20 @@ resources:
         TimeToLiveSpecification:
           AttributeName: ttl
           Enabled: true
-        # ContributorInsightsSpecification: ContributorInsightsSpecification
-        # DeletionProtectionEnabled: Boolean
-        # GlobalSecondaryIndexes:
-        #   - GlobalSecondaryIndex
-        # ImportSourceSpecification: ImportSourceSpecification
-        # KinesisStreamSpecification: KinesisStreamSpecification
-        # LocalSecondaryIndexes:
-        #   - LocalSecondaryIndex
-        # PointInTimeRecoverySpecification: PointInTimeRecoverySpecification
-        # SSESpecification: SSESpecification
-        # StreamSpecification: StreamSpecification
-        # TableClass: String
-        # Tags:
-        #   - Tag
 
     #-------------------------------#
-    #    2.10.DynamoDB DAX Cluster  #
+    #    2.6.RDS Aurora Cluster     #
     #-------------------------------#
-    # MyDaxCluster:
-    #   Type: AWS::DAX::Cluster
-    #   Properties:
-    #     ClusterName: MyDaxCluster
-    #     IAMRoleARN: !GetAtt MyDaxRole.Arn
-    #     NodeType: t2.small
-    #     ReplicationFactor: 1
-    #     AvailabilityZones:
-    #       - String
-    #     ClusterEndpointEncryptionType: String
-    #     Description: String
-    #     NotificationTopicARN: String
-    #     ParameterGroupName: String
-    #     PreferredMaintenanceWindow: String
-    #     SecurityGroupIds:
-    #       - String
-    #     SSESpecification: SSESpecification
-    #     SubnetGroupName: String
-    #     Tags: Json
-
-    #-------------------------------#
-    #    2.11.DB Subnet Group       #
-    #-------------------------------#
-    DBSubnetGroup:
-      Type: "AWS::RDS::DBSubnetGroup"
+    RdsDBInstance:
+      Type: "AWS::RDS::DBInstance"
       Properties:
-        DBSubnetGroupDescription: "DB Subnet Group"
-        SubnetIds:
-          - Ref: PrivateSubnet
-        # DBSubnetGroupName: String
+        Engine: aurora-mysql
+        DBInstanceClass: db.serverless
+        DBClusterIdentifier: !Ref RdsDBCluster
+        PubliclyAccessible: true
 
     #-------------------------------#
-    #  2.12.DB VPC Security Group   #
-    #-------------------------------#
-    DatabaseVpcSecurityGroup:
-      Type: "AWS::EC2::SecurityGroup"
-      Properties:
-        GroupName: DBSecurityGroup
-        GroupDescription: "Allow Local Access"
-        SecurityGroupIngress:
-          - CidrIp: 10.0.0.0/16
-            IpProtocol: tcp
-            FromPort: 3306
-            ToPort: 3306
-        VpcId:
-          Ref: VPC
-
-    #-------------------------------#
-    #    2.13.RDS Aurora Cluster    #
+    #    2.7.RDS Aurora Instance    #
     #-------------------------------#
     RdsDBCluster:
       Type: "AWS::RDS::DBCluster"
@@ -441,144 +161,6 @@ resources:
         ServerlessV2ScalingConfiguration:
           MinCapacity: 0.5
           MaxCapacity: 1
-        DBSubnetGroupName:
-          Ref: DBSubnetGroup
-        VpcSecurityGroupIds:
-          - Ref: DatabaseVpcSecurityGroup
-        # AllocatedStorage: Integer
-        # AssociatedRoles:
-        #   - DBClusterRole
-        # AutoMinorVersionUpgrade: Boolean
-        # AvailabilityZones:
-        #   - String
-        # BacktrackWindow: Integer
-        # BackupRetentionPeriod: Integer
-        # CopyTagsToSnapshot: Boolean
-        # DBClusterInstanceClass: String
-        # DBClusterParameterGroupName: String
-        # DBInstanceParameterGroupName: String
-        # DBSystemId: String
-        # DeletionProtection: Boolean
-        # Domain: String
-        # DomainIAMRoleName: String
-        # EnableCloudwatchLogsExports:
-        #   - String
-        # EnableHttpEndpoint: Boolean
-        # EnableIAMDatabaseAuthentication: Boolean
-        # EngineMode: String
-        # GlobalClusterIdentifier: String
-        # Iops: Integer
-        # KmsKeyId: String
-        # ManageMasterUserPassword: Boolean
-        # MasterUserSecret:
-        #   MasterUserSecret
-        # MonitoringInterval: Integer
-        # MonitoringRoleArn: String
-        # NetworkType: String
-        # PerformanceInsightsEnabled: Boolean
-        # PerformanceInsightsKmsKeyId: String
-        # PerformanceInsightsRetentionPeriod: Integer
-        # Port: Integer
-        # PreferredBackupWindow: String
-        # PreferredMaintenanceWindow: String
-        # PubliclyAccessible: Boolean
-        # ReplicationSourceIdentifier: String
-        # RestoreToTime: String
-        # RestoreType: String
-        # ScalingConfiguration:
-        #   ScalingConfiguration
-        # SnapshotIdentifier: String
-        # SourceDBClusterIdentifier: String
-        # SourceRegion: String
-        # StorageEncrypted: Boolean
-        # StorageType: String
-        # Tags:
-        #   - Tag
-        # UseLatestRestorableTime: Boolean
-
-    #-------------------------------#
-    #    2.14.RDS Aurora Instance   #
-    #-------------------------------#
-    RdsDBInstance:
-      Type: "AWS::RDS::DBInstance"
-      Properties:
-        Engine: aurora-mysql
-        DBInstanceClass: db.serverless
-        DBClusterIdentifier: !Ref RdsDBCluster
-        PubliclyAccessible: true
-        # AllocatedStorage: String
-        # AllowMajorVersionUpgrade: Boolean
-        # AssociatedRoles:
-        #   - DBInstanceRole
-        # AutoMinorVersionUpgrade: Boolean
-        # AvailabilityZone: String
-        # BackupRetentionPeriod: Integer
-        # CACertificateIdentifier: String
-        # CertificateDetails:
-        #   CertificateDetails
-        # CertificateRotationRestart: Boolean
-        # CharacterSetName: String
-        # CopyTagsToSnapshot: Boolean
-        # CustomIAMInstanceProfile: String
-        # DBClusterSnapshotIdentifier: String
-        # DBInstanceIdentifier: String
-        # DBName: String
-        # DBParameterGroupName: String
-        # DBSecurityGroups:
-        #   - String
-        # DBSnapshotIdentifier: String
-        # DBSubnetGroupName: String
-        # DeleteAutomatedBackups: Boolean
-        # DeletionProtection: Boolean
-        # Domain: String
-        # DomainIAMRoleName: String
-        # EnableCloudwatchLogsExports:
-        #   - String
-        # EnableIAMDatabaseAuthentication: Boolean
-        # EnablePerformanceInsights: Boolean
-        # Endpoint:
-        #   Endpoint
-        # EngineVersion: String
-        # Iops: Integer
-        # KmsKeyId: String
-        # LicenseModel: String
-        # ManageMasterUserPassword: Boolean
-        # MasterUsername: String
-        # MasterUserPassword: String
-        # MasterUserSecret:
-        #   MasterUserSecret
-        # MaxAllocatedStorage: Integer
-        # MonitoringInterval: Integer
-        # MonitoringRoleArn: String
-        # MultiAZ: Boolean
-        # NcharCharacterSetName: String
-        # NetworkType: String
-        # OptionGroupName: String
-        # PerformanceInsightsKMSKeyId: String
-        # PerformanceInsightsRetentionPeriod: Integer
-        # Port: String
-        # PreferredBackupWindow: String
-        # PreferredMaintenanceWindow: String
-        # ProcessorFeatures:
-        #   - ProcessorFeature
-        # PromotionTier: Integer
-        # ReplicaMode: String
-        # RestoreTime: String
-        # SourceDBClusterIdentifier: String
-        # SourceDBInstanceAutomatedBackupsArn: String
-        # SourceDBInstanceIdentifier: String
-        # SourceDbiResourceId: String
-        # SourceRegion: String
-        # StorageEncrypted: Boolean
-        # StorageThroughput: Integer
-        # StorageType: String
-        # Tags:
-        #   - Tag
-        # Timezone: String
-        # UseDefaultProcessorFeatures: Boolean
-        # UseLatestRestorableTime: Boolean
-        # VPCSecurityGroups:
-        #   - String
 
 #------------------------------------------ 3.Functions -----------------------------------------#
 functions:
@@ -590,8 +172,8 @@ functions:
     events:
       # Using Amazon Aws Api Gateway v2 (HTTP API)
       # - httpApi:
-      #     method: ANY
-      #     path: /api/privateEndpoint
+      #     method: GET
+      #     path: /api/privateRoute
       #     authorizer:
       #       name: userAuthorization
       - httpApi: "*"
@@ -602,7 +184,6 @@ functions:
 #------------------------------------------ 4.Plugin --------------------------------------------#
 plugins:
   - serverless-esbuild
-  - serverless-dotenv-plugin
   - serverless-lift
   - serverless-s3-sync
 
@@ -623,20 +204,30 @@ custom:
   #-------------------------------#
   #     6.1.Database Info         #
   #-------------------------------#
-  DBName: "AnLabDB"
-  DBUserName: "AN_AuroraDB"
-  DBPassword: "AnLab2023"
+  DBName: ${file(./serverless.${opt:stage, 'dev'}.config.json):DB_Name}
+  DBUserName: ${file(./serverless.${opt:stage, 'dev'}.config.json):DB_UserName}
+  DBPassword: ${file(./serverless.${opt:stage, 'dev'}.config.json):DB_Password}
+  DBUrl:
+    Fn::GetAtt:
+      - MarketDB
+      - Endpoint.Address
 
   #-------------------------------#
-  #     6.2.Upload Assets To S3   #
+  #      6.2.Credentials Info     #
+  #-------------------------------#
+  AwsApiKey: ${file(./serverless.${opt:stage, 'dev'}.config.json):AMAZON_AWS_ACCESS_KEY_ID}
+  AwsSecretKey: ${file(./serverless.${opt:stage, 'dev'}.config.json):AMAZON_AWS_ACCESS_KEY_SECRET}
+
+  #-------------------------------#
+  #      6.3.Sync Assets Config   #
   #-------------------------------#
   s3Sync:
-    - bucketName: next-static-site-assets # TODO [AssetsBucket] use !Ref AssetsBucket instead of fixed bucket name
+    - bucketName: next-static-site-assets
       localDir: .next/static
       bucketPrefix: _next/static/
 
   #-------------------------------#
-  #     6.3.Build Option          #
+  #      6.4.Build Config         #
   #-------------------------------#
   esbuild:
     bundle: true
@@ -644,18 +235,6 @@ custom:
     exclude: "*"
     external:
       - "next"
-
-  #-------------------------------#
-  #     6.4.Import .env Value     #
-  #-------------------------------#
-  dotenv:
-    include:
-      - AMAZON_AWS_ACCESS_KEY_ID
-      - AMAZON_AWS_ACCESS_KEY_SECRET
-    required:
-      env:
-        - AMAZON_AWS_ACCESS_KEY_ID
-        - AMAZON_AWS_ACCESS_KEY_SECRET
 
 #------------------------------------------ 5.Construct -----------------------------------------#
 constructs:
