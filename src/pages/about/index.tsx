@@ -5,21 +5,21 @@ import { NextRouter, useRouter } from "next/router";
 import { ReactElement, useEffect, useState } from "react";
 
 async function logToServer(): Promise<any> {
-  return await new FetchService()
+  return new FetchService()
     .setURL("/api/log")
     .withBearerAuthorization()
     .fetch();
 }
 
 async function getHelloApi(): Promise<any> {
-  return await new FetchService()
+  return new FetchService()
     .setURL("/api/hello")
     .withBearerAuthorization()
     .fetch();
 }
 
 async function dispatchQueue(): Promise<any> {
-  await new FetchService()
+  new FetchService()
     .isPostRequest()
     .setURL("api/queueSender")
     .setHeader("Content-Type", "application/json")
@@ -102,6 +102,10 @@ export default function About(): ReactElement {
         onClick={(): Promise<any> => dispatchQueue()}
         className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
         Dispatch Queue
+      </button>
+
+      <button className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
+        <Link href='/dynamodb'>DynamoDB</Link>
       </button>
 
       <button className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>

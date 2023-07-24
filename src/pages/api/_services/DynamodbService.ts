@@ -15,6 +15,9 @@ import {
   QueryCommand,
   QueryInput,
   QueryOutput,
+  ScanCommand,
+  ScanInput,
+  ScanOutput,
 } from "@aws-sdk/client-dynamodb";
 import { AwsClientConfig as configuration } from "../_configs/AwsConfig";
 
@@ -48,6 +51,11 @@ export default class DynamodbService {
 
   static async queryDb(input: QueryInput): Promise<QueryOutput> {
     const command: QueryCommand = new QueryCommand(input);
+    return await DynamodbService.clientInstance.send(command);
+  }
+
+  static async scan(input: ScanInput): Promise<ScanOutput> {
+    const command: ScanCommand = new ScanCommand(input);
     return await DynamodbService.clientInstance.send(command);
   }
 }
