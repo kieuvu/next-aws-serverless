@@ -20,6 +20,7 @@ export function AuthMiddleware(
       if (!user) throw new UnauthorizedException();
       return handler(req, res, user);
     } catch (error) {
+      console.error("Api Error", error);
       if (error instanceof UnauthorizedException) {
         return res.status(401).json({
           status: false,
