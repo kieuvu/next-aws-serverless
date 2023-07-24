@@ -1,4 +1,4 @@
-service: serverless-next
+service: an-serverless-next-2
 
 useDotenv: true
 
@@ -7,7 +7,6 @@ provider:
   name: aws
   runtime: nodejs16.x
   region: us-east-1
-
   #-------------------------------#
   #         1.1.Environment       #
   #-------------------------------#
@@ -18,7 +17,7 @@ provider:
     USER_POOL: !Ref UserPool
     USER_POOL_CLIENT: !Ref UserClient
     AMAZON_AWS_DEFAULT_REGION: ${self:provider.region}
-    AWS_STATIC_BUCKET: next-static-site-assets
+    AWS_STATIC_BUCKET: !Ref AssetsBucket
     DYNAMODB_TABLE_NAME: !Ref MyDynamoDbTable
     AMAZON_AWS_ACCESS_KEY_ID: ${self:custom.AwsApiKey}
     AMAZON_AWS_ACCESS_KEY_SECRET: ${self:custom.AwsSecretKey}
@@ -30,12 +29,19 @@ provider:
   #-------------------------------#
   #      1.2.Auth Middleware      #
   #-------------------------------#
-  # httpApi:
-  #   authorizers:
-  #     userAuthorization:
-  #       identitySource: $request.header.Authorization
-  #       issuerUrl: { "Fn::Join": ["", ["https://cognito-idp.us-east-1.amazonaws.com/", !Ref UserPool]] }
-  #       audience: !Ref UserClient
+  httpApi:
+    authorizers:
+      userAuthorization:
+        identitySource: $request.header.Authorization
+        issuerUrl:
+          {
+            "Fn::Join":
+              [
+                "",
+                ["https://cognito-idp.us-east-1.amazonaws.com/", !Ref UserPool],
+              ],
+          }
+        audience: !Ref UserClient
 
   #-------------------------------#
   #        1.3.API Gateway        #
@@ -57,15 +63,30 @@ provider:
             - cognito-idp:AdminInitiateAuth
             - cognito-idp:AdminCreateUser
             - cognito-idp:AdminSetUserPassword
-            # DynamoDB
-            - dynamodb:DescribeTable
-            - dynamodb:Query
-            - dynamodb:Scan
-            - dynamodb:GetItem
-            - dynamodb:PutItem
-            - dynamodb:UpdateItem
-            - dynamodb:DeleteItem
+            # # DynamoDb
+            # - dynamodb:DescribeTable
+            # - dynamodb:Query
+            # - dynamodb:Scan
+            # - dynamodb:GetItem
+            # - dynamodb:PutItem
+            # - dynamodb:UpdateItem
+            # - dynamodb:DeleteItem
+            # # Log
+            # - logs:CreateLogGroup,
+            # - logs:CreateLogStream,
+            # - logs:PutLogEvents,
+            # - logs:DescribeLogStreams
           Resource: "*"
+
+  #-------------------------------#
+  #             1.5.VPC           #
+  #-------------------------------#
+  vpc: # [TODO - PUBLIC VPC] Remove this provider
+    securityGroupIds:
+      - Fn::GetAtt: [VPCSecurityGroup, GroupId]
+    subnetIds:
+      - !Ref PublicSubnet1
+      - !Ref PublicSubnet2
 
 #------------------------------------------ 2.Resource ------------------------------------------#
 resources:
@@ -75,6 +96,17 @@ resources:
     #-------------------------------#
     Storage:
       Type: AWS::S3::Bucket
+      Properties:
+        CorsConfiguration:
+          CorsRules:
+            - AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - DELETE
+                - HEAD
+              AllowedOrigins:
+                - "*"
 
     #-------------------------------#
     #      2.2.S3 Assets Storage    #
@@ -82,7 +114,28 @@ resources:
     AssetsBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: next-static-site-assets
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: false
+          BlockPublicPolicy: false
+          IgnorePublicAcls: false
+          RestrictPublicBuckets: false
+        CorsConfiguration:
+          CorsRules:
+            - AllowedMethods:
+                - GET
+                - HEAD
+              AllowedOrigins:
+                - "*"
+    AssetsBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref AssetsBucket
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal: "*"
+              Action: s3:GetObject
+              Resource: !Sub "${AssetsBucket.Arn}/*"
 
     #-------------------------------#
     #     2.3.Cognito User Pool     #
@@ -136,18 +189,7 @@ resources:
           Enabled: true
 
     #-------------------------------#
-    #    2.6.RDS Aurora Cluster     #
-    #-------------------------------#
-    RdsDBInstance:
-      Type: "AWS::RDS::DBInstance"
-      Properties:
-        Engine: aurora-mysql
-        DBInstanceClass: db.serverless
-        DBClusterIdentifier: !Ref RdsDBCluster
-        PubliclyAccessible: true
-
-    #-------------------------------#
-    #    2.7.RDS Aurora Instance    #
+    #    2.6.RDS Aurora Instance    #
     #-------------------------------#
     RdsDBCluster:
       Type: "AWS::RDS::DBCluster"
@@ -161,7 +203,210 @@ resources:
         ServerlessV2ScalingConfiguration:
           MinCapacity: 0.5
           MaxCapacity: 1
+        DBSubnetGroupName: !Ref DBSubnetGroup
+        VpcSecurityGroupIds:
+          - !Ref InstanceSecurityGroup
 
+    #-------------------------------#
+    #    2.7.RDS Aurora Cluster     #
+    #-------------------------------#
+    RdsDBInstance:
+      Type: "AWS::RDS::DBInstance"
+      Properties:
+        Engine: aurora-mysql
+        DBInstanceClass: db.serverless
+        DBClusterIdentifier: !Ref RdsDBCluster
+        PubliclyAccessible: true
+
+    #-------------------------------#
+    #            2.8.VPC            #
+    #-------------------------------#
+    VPC:
+      Type: AWS::EC2::VPC
+      Properties:
+        CidrBlock: 10.0.0.0/16
+        EnableDnsSupport: true
+        EnableDnsHostnames: true
+
+    #-------------------------------#
+    #        2.9.Private Subnet     #
+    #-------------------------------#
+    PrivateSubnet1:
+      Type: AWS::EC2::Subnet
+      Properties:
+        AvailabilityZone: !Sub "${self:provider.region}a"
+        CidrBlock: 10.0.8.0/24
+        VpcId: !Ref VPC
+        MapPublicIpOnLaunch: false
+    PrivateSubnet2:
+      Type: AWS::EC2::Subnet
+      Properties:
+        AvailabilityZone: !Sub "${self:provider.region}b"
+        CidrBlock: 10.0.32.0/24
+        VpcId: !Ref VPC
+        MapPublicIpOnLaunch: false
+
+    #-------------------------------#
+    #    2.10.Public Subnet         #
+    #-------------------------------#
+    PublicSubnet1:
+      Type: AWS::EC2::Subnet
+      Properties:
+        VpcId: !Ref VPC
+        AvailabilityZone: !Sub "${self:provider.region}a"
+        CidrBlock: 10.0.1.0/24
+        MapPublicIpOnLaunch: true
+    PublicSubnet2:
+      Type: AWS::EC2::Subnet
+      Properties:
+        VpcId: !Ref VPC
+        AvailabilityZone: !Sub "${self:provider.region}b"
+        CidrBlock: 10.0.2.0/24
+        MapPublicIpOnLaunch: true
+
+    #-------------------------------#
+    #    2.12.Internet Gateway      #
+    #-------------------------------#
+    InternetGateway:
+      Type: AWS::EC2::InternetGateway
+    GatewayToInternet:
+      Type: AWS::EC2::VPCGatewayAttachment
+      Properties:
+        VpcId: !Ref VPC
+        InternetGatewayId: !Ref InternetGateway
+
+    #-------------------------------#
+    #    2.13.Public Routing        #
+    #-------------------------------#
+    PublicRouteTable:
+      Type: AWS::EC2::RouteTable
+      Properties:
+        VpcId: !Ref VPC
+    PublicRoute:
+      Type: AWS::EC2::Route
+      DependsOn: GatewayToInternet
+      Properties:
+        RouteTableId: !Ref PublicRouteTable
+        DestinationCidrBlock: 0.0.0.0/0
+        GatewayId: !Ref InternetGateway
+    PublicSubnet1RouteTableAssociation:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+        SubnetId: !Ref PublicSubnet1
+        RouteTableId: !Ref PublicRouteTable
+    PublicSubnet2RouteTableAssociation:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+        SubnetId: !Ref PublicSubnet2
+        RouteTableId: !Ref PublicRouteTable
+
+    #-------------------------------#
+    #    2.14.Nat Gateway           #
+    #-------------------------------#
+    NatGateway:
+      Type: AWS::EC2::NatGateway
+      DependsOn: NatPublicIP
+      Properties:
+        SubnetId: !Ref PublicSubnet1
+        AllocationId: !GetAtt NatPublicIP.AllocationId
+    NatGatewayPublicSubnet2:
+      Type: AWS::EC2::NatGateway
+      DependsOn: NatPublicIPPublicSubnet2
+      Properties:
+        SubnetId: !Ref PublicSubnet2
+        AllocationId: !GetAtt NatPublicIPPublicSubnet2.AllocationId
+
+    #-------------------------------#
+    #    2.15.Elastic IP            #
+    #-------------------------------#
+    NatPublicIP:
+      Type: AWS::EC2::EIP
+      DependsOn: VPC
+      Properties:
+        Domain: vpc
+    NatPublicIPPublicSubnet2:
+      Type: AWS::EC2::EIP
+      DependsOn: VPC
+      Properties:
+        Domain: vpc
+
+    #-------------------------------#
+    #    2.16.Private Routing       #
+    #-------------------------------#
+    PrivateRouteTable:
+      Type: AWS::EC2::RouteTable
+      Properties:
+        VpcId: !Ref VPC
+    PrivateRoute:
+      Type: AWS::EC2::Route
+      Properties:
+        NatGatewayId: !Ref NatGateway
+        RouteTableId: !Ref PrivateRouteTable
+        DestinationCidrBlock: 0.0.0.0/0
+    PrivateSubnet1RouteTableAssociation:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+        SubnetId: !Ref PrivateSubnet1
+        RouteTableId: !Ref PrivateRouteTable
+    PrivateSubnet2RouteTableAssociation:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+        SubnetId: !Ref PrivateSubnet2
+        RouteTableId: !Ref PrivateRouteTable
+
+    #-------------------------------#
+    #    2.17.DB Subnet Group       #
+    #-------------------------------#
+    DBSubnetGroup:
+      Type: "AWS::RDS::DBSubnetGroup"
+      Properties:
+        DBSubnetGroupDescription: "DB Subnet Group"
+        SubnetIds:
+          - !Ref PublicSubnet1
+          - !Ref PublicSubnet2
+
+    #-------------------------------#
+    #  2.18.DB VPC Security Group   #
+    #-------------------------------#
+    VPCSecurityGroup:
+      Type: "AWS::EC2::SecurityGroup"
+      Properties:
+        GroupName: DBSecurityGroup
+        GroupDescription: "Allow Local Access"
+        SecurityGroupIngress:
+          - CidrIp: 10.0.0.0/16
+            IpProtocol: tcp
+            FromPort: 3306
+            ToPort: 3306
+        VpcId: !Ref VPC
+    InstanceSecurityGroup:
+      Type: "AWS::EC2::SecurityGroup"
+      Properties:
+        GroupName: "SecurityGroup"
+        GroupDescription: "SecurityGroup"
+        VpcId: !Ref "VPC"
+        SecurityGroupEgress:
+          - IpProtocol: "-1"
+            CidrIp: "0.0.0.0/0"
+    PublicInstanceSecurityGroupIngress:
+      Type: "AWS::EC2::SecurityGroupIngress"
+      DependsOn: "InstanceSecurityGroup"
+      Properties:
+        GroupId: !Ref "InstanceSecurityGroup"
+        IpProtocol: "-1"
+        CidrIp: "0.0.0.0/0"
+    InstanceSecurityGroupIngress:
+      Type: "AWS::EC2::SecurityGroupIngress"
+      DependsOn: "InstanceSecurityGroup"
+      Properties:
+        GroupId: !Ref "InstanceSecurityGroup"
+        IpProtocol: "tcp"
+        FromPort: 0
+        ToPort: 65535
+        SourceSecurityGroupId: !Ref "InstanceSecurityGroup"
+  Outputs:
+    AssetsBucketNameOutputKey:
+      Value: !Ref AssetsBucket
 #------------------------------------------ 3.Functions -----------------------------------------#
 functions:
   #-------------------------------#
@@ -169,6 +414,7 @@ functions:
   #-------------------------------#
   api:
     handler: server.handler
+    vpc: ~ # [TODO - PUBLIC VPC] Remove this line
     events:
       # Using Amazon Aws Api Gateway v2 (HTTP API)
       # - httpApi:
@@ -209,7 +455,7 @@ custom:
   DBPassword: ${file(./serverless.${opt:stage, 'dev'}.config.json):DB_Password}
   DBUrl:
     Fn::GetAtt:
-      - MarketDB
+      - RdsDBCluster
       - Endpoint.Address
 
   #-------------------------------#
@@ -221,8 +467,9 @@ custom:
   #-------------------------------#
   #      6.3.Sync Assets Config   #
   #-------------------------------#
+  # [Doc] https://github.com/k1LoW/serverless-s3-sync
   s3Sync:
-    - bucketName: next-static-site-assets
+    - bucketNameKey: AssetsBucketNameOutputKey
       localDir: .next/static
       bucketPrefix: _next/static/
 
@@ -241,6 +488,7 @@ constructs:
   #-------------------------------#
   #        5.1.Job Handler        #
   #-------------------------------#
+  # [Doc] https://github.com/getlift/lift/blob/master/docs/queue.md
   jobs:
     type: queue
     worker:
