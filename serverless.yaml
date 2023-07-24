@@ -368,7 +368,7 @@ resources:
     #-------------------------------#
     #  2.18.DB VPC Security Group   #
     #-------------------------------#
-    VPCSecurityGroup:
+    VPCSecurityGroup: # [TODO - PUBLIC VPC] Remove this provider
       Type: "AWS::EC2::SecurityGroup"
       Properties:
         GroupName: DBSecurityGroup
