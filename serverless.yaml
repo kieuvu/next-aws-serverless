@@ -12,7 +12,7 @@ provider:
   #-------------------------------#
   environment:
     APP_ENV: ${sls:stage}
-    AWS_BUCKET: !Ref Storage
+    AWS_BUCKET: !Ref PublicStorageBucket
     AWS_SQS_URL: ${construct:jobs.queueUrl}
     USER_POOL: !Ref UserPool
     USER_POOL_CLIENT: !Ref UserClient
@@ -96,21 +96,38 @@ resources:
     #-------------------------------#
     Storage:
       Type: AWS::S3::Bucket
-      Properties:
-        CorsConfiguration:
-          CorsRules:
-            - AllowedMethods:
-                - GET
-                - PUT
-                - POST
-                - DELETE
-                - HEAD
-              AllowedOrigins:
-                - "*"
 
     #-------------------------------#
     #      2.2.S3 Assets Storage    #
     #-------------------------------#
+    PublicStorageBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: false
+          BlockPublicPolicy: false
+          IgnorePublicAcls: false
+          RestrictPublicBuckets: false
+        CorsConfiguration:
+          CorsRules:
+            - AllowedMethods:
+                - GET
+                - HEAD
+                - DELETE
+                - PUT
+                - POST
+              AllowedOrigins:
+                - "*"
+    PublicStorageBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref PublicStorageBucket
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal: "*"
+              Action: s3:GetObject
+              Resource: !Sub "${PublicStorageBucket.Arn}/*"
     AssetsBucket:
       Type: AWS::S3::Bucket
       Properties:
