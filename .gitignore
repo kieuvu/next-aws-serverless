@@ -59,3 +59,5 @@ amplifytools.xcconfig
 
 .env
 .esbuild/
+
+serverless.*.config.json
