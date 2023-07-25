@@ -31,11 +31,11 @@ async function handler(
 
   const { fileType } = <CreateS3PresignedRequest>req.query;
 
-  const filename: string = randomUUID();
+  const filename: string = `images/${randomUUID()}`;
   const bucket: string = Env.get<string>("AWS_BUCKET");
 
   const post: PresignedPost = await S3Service.createPresignedPost({
-    key: `images/${filename}`,
+    key: filename,
     "Content-Type": fileType,
   });
 

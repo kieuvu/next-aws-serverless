@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ReactElement, ReactNode, useEffect, useState } from "react";
 
 export default function File(): ReactElement {
-  const [file, setFile] = useState<Blob>(new Blob());
+  const [file, setFile] = useState<Blob | null>(null);
   const [images, setImages] = useState<[]>([]);
 
   useEffect((): void => {
@@ -24,6 +24,19 @@ export default function File(): ReactElement {
   }
 
   async function handleFileUpload(): Promise<void> {
+    if (!file) {
+      alert("No file input detected");
+      return;
+    }
+
+    const fileSizeInBytes: number = file.size;
+    const maxFileSizeInBytes: number = 1024 * 1024;
+
+    if (fileSizeInBytes >= maxFileSizeInBytes) {
+      alert("File size exceeds the maximum allowed size of 1MB.");
+      return;
+    }
+
     const fileName: string = encodeURIComponent(file.name);
     const fileType: string = encodeURIComponent(file.type);
 
@@ -102,8 +115,9 @@ export default function File(): ReactElement {
                 key={index}>
                 <div className='table-cell pt-2'>
                   <Link
+                    target='_blank'
                     className='text-blue-600 underline '
-                    href={`https://${image.bucket}.s3.amazonaws.com/images/${image.name}`}>
+                    href={`https://${image.bucket}.s3.amazonaws.com/${image.name}`}>
                     {image.name}
                   </Link>
                 </div>
