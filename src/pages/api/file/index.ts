@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { Image } from "../../_models";
-import { AuthMiddleware } from "../../_middleware/authMiddleware";
-import { HttpMethod } from "../../_utils/HttpMethod";
+import { Image } from "../_models";
+import { AuthMiddleware } from "../_middleware/authMiddleware";
+import { HttpMethod } from "../_utils/HttpMethod";
 
 type UploadRequest = {
   bucket: string;

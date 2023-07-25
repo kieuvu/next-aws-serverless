@@ -16,7 +16,7 @@ export default function File(): ReactElement {
 
   async function getImages(): Promise<void> {
     const response: any = await new FetchService()
-      .setURL("/api/database/sequelize")
+      .setURL("/api/file")
       .withBearerAuthorization()
       .fetch();
 
@@ -54,7 +54,7 @@ export default function File(): ReactElement {
 
       await new FetchService()
         .isPostRequest()
-        .setURL("/api/database/sequelize")
+        .setURL("/api/file")
         .setData({
           filename,
           bucket,
