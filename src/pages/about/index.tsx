@@ -1,4 +1,5 @@
 import FetchService from "@/services/FetchService";
+import { InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 import { NextRouter, useRouter } from "next/router";
 import { ReactElement, useEffect, useState } from "react";
@@ -26,7 +27,17 @@ async function dispatchQueue(): Promise<any> {
     .fetch();
 }
 
-export default function About(): ReactElement {
+export async function getServerSideProps(): Promise<any> {
+  const res: Response = await fetch(
+    "https://api.github.com/repos/vercel/next.js",
+  );
+  const repo: any = await res.json();
+  return { props: { repo } };
+}
+
+export default function About({
+  repo,
+}: InferGetServerSidePropsType<typeof getServerSideProps>): ReactElement {
   const [helloMessage, setHelloMessage] = useState<string>("");
   const [logMessage, setLogMessage] = useState<string>("");
   const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
@@ -59,6 +70,12 @@ export default function About(): ReactElement {
 
   return (
     <div className='h-[100vh] flex items-center justify-center flex-col'>
+      <div className='mb-5'>
+        Test: Data Received From getServerSideProps()
+        <div className='h-[200px] overflow-auto'>
+          <pre>{JSON.stringify(repo, null, 4)}</pre>
+        </div>
+      </div>
       <code className='font-mono font-bold my-2'>
         Test API: Get Hello Message From Api: [
         {!isAuthorized && !isFetching ? (
