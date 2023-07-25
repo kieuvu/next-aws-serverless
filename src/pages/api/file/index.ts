@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { Image } from "../_models";
 import { AuthMiddleware } from "../_middleware/authMiddleware";
 import { HttpMethod } from "../_utils/HttpMethod";
+import Env from "../_utils/Env";
 
 type UploadRequest = {
   bucket: string;
@@ -19,6 +20,12 @@ async function handler(
   res: NextApiResponse<UploadResponse>,
   user: any,
 ): Promise<void> {
+  console.log({
+    host: Env.get<string>("DB_URL"),
+    database: Env.get<string>("DB_Name"),
+    user: Env.get<string>("DB_UserName"),
+    password: Env.get<string>("DB_Password"),
+  });
   switch (req.method) {
     case HttpMethod.POST:
       const { bucket, filename } = <UploadRequest>JSON.parse(req.body);

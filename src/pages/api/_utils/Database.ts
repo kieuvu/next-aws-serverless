@@ -3,9 +3,9 @@ import Env from "./Env";
 
 const config = {
   host: Env.get<string>("DB_URL"),
-  database: Env.get<string>("DB_Name"),
-  user: Env.get<string>("DB_UserName"),
-  password: Env.get<string>("DB_Password"),
+  database: Env.get<string>("DB_NAME"),
+  user: Env.get<string>("DB_USERNAME"),
+  password: Env.get<string>("DB_PASSWORD"),
 };
 
 export const sequelize = new Sequelize({
