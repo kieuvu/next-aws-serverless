@@ -25,6 +25,8 @@ async function dispatchQueue(): Promise<any> {
     .setHeader("Content-Type", "application/json")
     .withBearerAuthorization()
     .fetch();
+
+  alert("Queue message sent, Get queue info in Cloudwatch Log");
 }
 
 export async function getServerSideProps(): Promise<any> {
@@ -66,6 +68,7 @@ export default function About({
   async function handleLogToServer(): Promise<void> {
     const logData: any = await logToServer();
     if (logData?.status) setLogMessage(logData.logMessage);
+    alert("Log message sent, Get log info in Cloudwatch Log");
   }
 
   return (
