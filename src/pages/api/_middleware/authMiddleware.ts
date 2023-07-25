@@ -17,6 +17,8 @@ export function AuthMiddleware(
       const token: string = authorizationToken.split(" ")[1];
       const user: any = await CognitoService.getUser(token);
 
+      console.log(user);
+
       if (!user) throw new UnauthorizedException();
       return handler(req, res, user);
     } catch (error) {

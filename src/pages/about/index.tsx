@@ -1,4 +1,3 @@
-import ImageUpload from "@/components/ImageUpload";
 import FetchService from "@/services/FetchService";
 import Link from "next/link";
 import { NextRouter, useRouter } from "next/router";
@@ -30,8 +29,7 @@ async function dispatchQueue(): Promise<any> {
 export default function About(): ReactElement {
   const [helloMessage, setHelloMessage] = useState<string>("");
   const [logMessage, setLogMessage] = useState<string>("");
-  const [uploadFileToggle, setUploadFileToggle] = useState<boolean>(false);
-  const [isUnauthorized, setIsUnauthorized] = useState<boolean>(false);
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
   const [isFetching, setIsFetching] = useState<boolean>(true);
 
   const router: NextRouter = useRouter();
@@ -41,8 +39,9 @@ export default function About(): ReactElement {
       setIsFetching(true);
       const response: any = await getHelloApi();
       setIsFetching(false);
-      if (response.status) return setHelloMessage(response.message);
-      setIsUnauthorized(true);
+      if (!response.status) return setIsAuthorized(false);
+      setHelloMessage(response.message);
+      setIsAuthorized(true);
     }
 
     fetch();
@@ -62,7 +61,7 @@ export default function About(): ReactElement {
     <div className='h-[100vh] flex items-center justify-center flex-col'>
       <code className='font-mono font-bold my-2'>
         Test API: Get Hello Message From Api: [
-        {isUnauthorized ? (
+        {!isAuthorized && !isFetching ? (
           <>
             <code>Unauthorized: </code>
             <Link
@@ -82,42 +81,43 @@ export default function About(): ReactElement {
         )}
         ]
       </code>
+      {!isAuthorized ? (
+        <></>
+      ) : (
+        <>
+          <button
+            onClick={(): Promise<void> => handleLogToServer()}
+            className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
+            Log Something On Server <br />
+            {logMessage}
+          </button>
 
-      <button
-        onClick={(): Promise<void> => handleLogToServer()}
-        className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
-        Log Anything On Server <br />
-        {logMessage}
-      </button>
+          <button
+            onClick={(): Promise<any> => dispatchQueue()}
+            className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
+            Dispatch Queue
+          </button>
 
-      <button
-        onClick={(): void => setUploadFileToggle(!uploadFileToggle)}
-        className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
-        Upload File To S3
-      </button>
+          <button className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
+            <Link href='/dynamodb'>DynamoDB</Link>
+          </button>
 
-      {uploadFileToggle ? <ImageUpload /> : <></>}
+          <button className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
+            <Link href='/file'>Upload File</Link>
+          </button>
 
-      <button
-        onClick={(): Promise<any> => dispatchQueue()}
-        className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
-        Dispatch Queue
-      </button>
+          <button className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
+            <Link href='/'>Back To Home</Link>
+          </button>
 
-      <button className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
-        <Link href='/dynamodb'>DynamoDB</Link>
-      </button>
-
-      <button className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
-        <Link href='/'>Back To Home</Link>
-      </button>
-
-      {!isFetching && !isUnauthorized && (
-        <button
-          onClick={(): void => logout()}
-          className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
-          Logout
-        </button>
+          {!isFetching && isAuthorized && (
+            <button
+              onClick={(): void => logout()}
+              className='my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
+              Logout
+            </button>
+          )}
+        </>
       )}
     </div>
   );
