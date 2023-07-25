@@ -10,7 +10,7 @@ sed -i 's/\/\/ assetPrefix/assetPrefix/' $NEXT_CONFIG_FILE
 echo "Next Config:"
 cat $NEXT_CONFIG_FILE
 
-npm run-script build
+yarn build
 
 rm -rf $DISTRIBUTION_FOLDER
 
