@@ -24,6 +24,7 @@ sed -i 's/assetPrefix/\/\/ assetPrefix/' $NEXT_CONFIG_FILE
 cp serverless.yaml $DISTRIBUTION_FOLDER/
 cp serverless.dev.config.json $DISTRIBUTION_FOLDER/
 cp server.ts $DISTRIBUTION_FOLDER/
+cp fetchTest.js $DISTRIBUTION_FOLDER/
 cp queueWorker.ts $DISTRIBUTION_FOLDER/
 cp -r public $DISTRIBUTION_FOLDER/
 
