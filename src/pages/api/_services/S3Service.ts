@@ -7,7 +7,15 @@ import {
 
 export default class S3Service {
   private static bucket: string = AwsConfig.bucket;
-  private static clientInstance: S3Client = new S3Client(configuration);
+  private static clientInstance: S3Client = new S3Client({
+    ...configuration,
+    forcePathStyle: true,
+    credentials: {
+      accessKeyId: "S3RVER",
+      secretAccessKey: "S3RVER",
+    },
+    endpoint: `http://localhost:8000`,
+  });
 
   public static async createPresignedPost(data: {
     key: string;

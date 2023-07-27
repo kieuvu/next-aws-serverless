@@ -6,9 +6,9 @@ NEXT_CONFIG_FILE=next.config.js
 rm -rf .next
 rm -rf $DISTRIBUTION_FOLDER
 
-sed -i 's/\/\/ assetPrefix/assetPrefix/' $NEXT_CONFIG_FILE
-echo "Next Config:"
-cat $NEXT_CONFIG_FILE
+# sed -i 's/\/\/ assetPrefix/assetPrefix/' $NEXT_CONFIG_FILE
+# echo "Next Config:"
+# cat $NEXT_CONFIG_FILE
 
 yarn build
 
@@ -19,12 +19,13 @@ cp -r .next/static $DISTRIBUTION_FOLDER/.next
 rm $DISTRIBUTION_FOLDER/server.js
 
 cp -r next.config.js $DISTRIBUTION_FOLDER/
-sed -i 's/assetPrefix/\/\/ assetPrefix/' $NEXT_CONFIG_FILE
+# sed -i 's/assetPrefix/\/\/ assetPrefix/' $NEXT_CONFIG_FILE
 
 cp serverless.yaml $DISTRIBUTION_FOLDER/
 cp serverless.dev.config.json $DISTRIBUTION_FOLDER/
 cp server.ts $DISTRIBUTION_FOLDER/
 cp fetchTest.js $DISTRIBUTION_FOLDER/
+cp s3cors.xml $DISTRIBUTION_FOLDER/
 cp queueWorker.ts $DISTRIBUTION_FOLDER/
 cp -r public $DISTRIBUTION_FOLDER/
 
@@ -34,7 +35,7 @@ cd $DISTRIBUTION_FOLDER
 # read DEPLOY_FUNCTION
 
 # if [[ "$DEPLOY_FUNCTION" == "" ]]; then
-  sls deploy
+  sls offline start
 # else
 #   sls deploy function -f "$DEPLOY_FUNCTION"
 # fi

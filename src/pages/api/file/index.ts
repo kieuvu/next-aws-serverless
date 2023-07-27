@@ -28,6 +28,7 @@ async function handler(
   });
   switch (req.method) {
     case HttpMethod.POST:
+      console.log("Saving image...");
       const { bucket, filename } = <UploadRequest>JSON.parse(req.body);
 
       const image: Image = new Image();

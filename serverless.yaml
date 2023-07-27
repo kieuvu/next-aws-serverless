@@ -66,6 +66,7 @@ resources:
     PublicStorageBucket:
       Type: AWS::S3::Bucket
       Properties:
+        BucketName: ${env:AWS_BUCKET}
         PublicAccessBlockConfiguration:
           BlockPublicAcls: false
           BlockPublicPolicy: false
@@ -94,6 +95,7 @@ resources:
     AssetsBucket:
       Type: AWS::S3::Bucket
       Properties:
+        BucketName: ${env:AWS_STATIC_BUCKET}
         PublicAccessBlockConfiguration:
           BlockPublicAcls: false
           BlockPublicPolicy: false
@@ -395,6 +397,9 @@ plugins:
   - serverless-esbuild
   - serverless-lift
   - serverless-s3-sync
+  - serverless-s3-local
+  - serverless-offline
+  - serverless-dotenv-plugin
 
 #------------------------------------------ 5.Package -------------------------------------------#
 package:
@@ -410,6 +415,15 @@ package:
 
 #------------------------------------------ 6.Custom --------------------------------------------#
 custom:
+  dotenv:
+    exclude:
+      - APP_ENV
+
+  s3:
+    port: 8000
+    directory: ./s3-data/
+    cors: ./s3cors.xml
+
   #-------------------------------#
   #     6.1.Database Info         #
   #-------------------------------#
