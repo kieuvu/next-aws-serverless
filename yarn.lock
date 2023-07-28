@@ -3858,6 +3858,22 @@ aws-dynamodb-local@^0.0.10:
     rimraf "^2.6.3"
     tar "^4.4.19"
 
+aws-sdk@^2.1234.0, aws-sdk@^2.7.0:
+  version "2.1424.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1424.0.tgz#74dd3e865b30cc478df188a6520490171ae8bc56"
+  integrity sha512-F6+wIp/K4UCg4sWQmQuuFReRNA0eYaPTHjt2is5uHE+2Vk2ojBbwatahbUnEB335tRZhndKf4UwyoyuuAdakMw==
+  dependencies:
+    buffer "4.9.2"
+    events "1.1.1"
+    ieee754 "1.1.13"
+    jmespath "0.16.0"
+    querystring "0.2.0"
+    sax "1.2.1"
+    url "0.10.3"
+    util "^0.12.4"
+    uuid "8.0.0"
+    xml2js "0.5.0"
+
 aws-sdk@^2.1404.0:
   version "2.1411.0"
   resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1411.0.tgz#7a6f5cd56b2f349038d378991e50e25b67976bb7"
@@ -3894,22 +3910,6 @@ aws-sdk@^2.346.0:
   version "2.1413.0"
   resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1413.0.tgz#5ca9c08bacd3523fd6442dc3849d5f558d4e1f5b"
   integrity sha512-vKpjC7iRwOhgv7P0xw90mVGO//2rqVPJKyYIs7uxLzSV0JzriVD+yqktOu/Hz6/phOmAd1cMIeFgpEC9ynrppg==
-  dependencies:
-    buffer "4.9.2"
-    events "1.1.1"
-    ieee754 "1.1.13"
-    jmespath "0.16.0"
-    querystring "0.2.0"
-    sax "1.2.1"
-    url "0.10.3"
-    util "^0.12.4"
-    uuid "8.0.0"
-    xml2js "0.5.0"
-
-aws-sdk@^2.7.0:
-  version "2.1424.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1424.0.tgz#74dd3e865b30cc478df188a6520490171ae8bc56"
-  integrity sha512-F6+wIp/K4UCg4sWQmQuuFReRNA0eYaPTHjt2is5uHE+2Vk2ojBbwatahbUnEB335tRZhndKf4UwyoyuuAdakMw==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -5329,6 +5329,11 @@ event-emitter@^0.3.5:
   dependencies:
     d "1"
     es5-ext "~0.10.14"
+
+eventemitter3@^4.0.4:
+  version "4.0.7"
+  resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-4.0.7.tgz#2de9b68f6528d5644ef5c59526a1b4a07306169f"
+  integrity sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==
 
 events@1.1.1:
   version "1.1.1"
@@ -7534,6 +7539,14 @@ p-memoize@^7.1.1:
     mimic-fn "^4.0.0"
     type-fest "^3.0.0"
 
+p-queue@^6.6.2:
+  version "6.6.2"
+  resolved "https://registry.yarnpkg.com/p-queue/-/p-queue-6.6.2.tgz#2068a9dcf8e67dd0ec3e7a2bcb76810faa85e426"
+  integrity sha512-RwFpb72c/BhQLEXIZ5K2e+AhgNVmIejGlTgiB9MzZ0e93GRvqZ7uSi0dvRF7/XIXDeNkra2fNHBxTyPDGySpjQ==
+  dependencies:
+    eventemitter3 "^4.0.4"
+    p-timeout "^3.2.0"
+
 p-retry@^5.1.2:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/p-retry/-/p-retry-5.1.2.tgz#c16eaee4f2016f9161d12da40d3b8b0f2e3c1b76"
@@ -7542,7 +7555,7 @@ p-retry@^5.1.2:
     "@types/retry" "0.12.1"
     retry "^0.13.1"
 
-p-timeout@^3.1.0:
+p-timeout@^3.1.0, p-timeout@^3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/p-timeout/-/p-timeout-3.2.0.tgz#c7e17abc971d2a7962ef83626b35d635acf23dfe"
   integrity sha512-rhIwUycgwwKcP9yTOOFK/AKsAopjjCakVqLHePO3CC6Mir1Z99xT+R63jZxAT5lFZLa2inS5h+ZS2GvR99/FBg==
@@ -8299,6 +8312,15 @@ serverless-lift@^1.27.0:
     stripe "^8.160.0"
     toml "^3.0.0"
     traverse "^0.6.6"
+
+serverless-offline-sqs@^7.3.2:
+  version "7.3.2"
+  resolved "https://registry.yarnpkg.com/serverless-offline-sqs/-/serverless-offline-sqs-7.3.2.tgz#3a97d456ecdb6312b7874ca7201913ac56f0f789"
+  integrity sha512-e2qsDdyidBYVct+UNCnw1tNjSwjbmQlw4iD0oe3SsH2X29UBL1lJkZbtnAPimWqoDsdSNIhU7vg70f1GYSmecQ==
+  dependencies:
+    aws-sdk "^2.1234.0"
+    lodash "^4.17.21"
+    p-queue "^6.6.2"
 
 serverless-offline@^12.0.0, serverless-offline@^12.0.4:
   version "12.0.4"

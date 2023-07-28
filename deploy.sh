@@ -10,6 +10,19 @@ rm -rf $DISTRIBUTION_FOLDER
 # echo "Next Config:"
 # cat $NEXT_CONFIG_FILE
 
+root='.'  # Project root
+lib="${root}/node_modules/serverless-offline-sqs/src/sqs.js"
+
+if grep -q patched "$lib"; then
+  echo sqs.js already patched
+else
+  echo sqs.js is missing the patch, applying...
+  sed -i "s|const sqsEvent = new SQSEventDefinition|// patched\n    const {queueName} = this.options;\n\n    if (queueName) rawSqsEventDefinition.queueName = queueName;\n\n    const sqsEvent = new SQSEventDefinition|" "$lib"
+  echo done
+fi
+
+docker run -p 4566:4566 -d --restart unless-stopped localstack/localstack
+
 sls dynamodb install
 
 yarn build
@@ -39,7 +52,7 @@ cd $DISTRIBUTION_FOLDER
 # read DEPLOY_FUNCTION
 
 # if [[ "$DEPLOY_FUNCTION" == "" ]]; then
-  sls offline start
+  sls offline start --verbose --useInProcess
 # else
 #   sls deploy function -f "$DEPLOY_FUNCTION"
 # fi

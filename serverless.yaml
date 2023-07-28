@@ -400,6 +400,7 @@ plugins:
   - serverless-s3-local
   - serverless-dotenv-plugin
   - serverless-dynamodb
+  - serverless-offline-sqs
   - serverless-offline
 
 #------------------------------------------ 5.Package -------------------------------------------#
@@ -416,12 +417,17 @@ package:
 
 #------------------------------------------ 6.Custom --------------------------------------------#
 custom:
+  serverless-offline-sqs:
+    queueName: an-serverless-next-2-rds-dev-jobs
+    autoCreate: true
+    region: us-east-1
+    endpoint: http://localhost:4566
+
   dotenv:
     exclude:
       - APP_ENV
 
   dynamodb:
-    # If you only want to use DynamoDB Local in some stages, declare them here
     stages:
       - dev
     start:
