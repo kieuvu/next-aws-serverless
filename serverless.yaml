@@ -398,8 +398,9 @@ plugins:
   - serverless-lift
   - serverless-s3-sync
   - serverless-s3-local
-  - serverless-offline
   - serverless-dotenv-plugin
+  - serverless-dynamodb
+  - serverless-offline
 
 #------------------------------------------ 5.Package -------------------------------------------#
 package:
@@ -419,8 +420,16 @@ custom:
     exclude:
       - APP_ENV
 
+  dynamodb:
+    # If you only want to use DynamoDB Local in some stages, declare them here
+    stages:
+      - dev
+    start:
+      port: 8002
+      migrate: true
+
   s3:
-    port: 8000
+    port: 8001
     directory: ./s3-data/
     cors: ./s3cors.xml
 

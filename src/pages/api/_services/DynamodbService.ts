@@ -22,9 +22,15 @@ import {
 import { AwsClientConfig as configuration } from "../_configs/AwsConfig";
 
 export default class DynamodbService {
-  private static clientInstance: DynamoDBClient = new DynamoDBClient(
-    configuration,
-  );
+  private static clientInstance: DynamoDBClient = new DynamoDBClient({
+    ...configuration,
+    region: "localhost",
+    endpoint: "http://0.0.0.0:8002",
+    credentials: {
+      accessKeyId: "MockAccessKeyId",
+      secretAccessKey: "MockSecretAccessKey",
+    },
+  });
 
   static async getAllTables(
     inp?: ListTablesInput,

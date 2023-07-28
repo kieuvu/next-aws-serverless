@@ -14,7 +14,7 @@ export default class S3Service {
       accessKeyId: "S3RVER",
       secretAccessKey: "S3RVER",
     },
-    endpoint: `http://localhost:8000`,
+    endpoint: `http://localhost:8001`,
   });
 
   public static async createPresignedPost(data: {

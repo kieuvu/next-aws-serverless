@@ -10,6 +10,8 @@ rm -rf $DISTRIBUTION_FOLDER
 # echo "Next Config:"
 # cat $NEXT_CONFIG_FILE
 
+sls dynamodb install
+
 yarn build
 
 rm -rf $DISTRIBUTION_FOLDER
@@ -20,6 +22,8 @@ rm $DISTRIBUTION_FOLDER/server.js
 
 cp -r next.config.js $DISTRIBUTION_FOLDER/
 # sed -i 's/assetPrefix/\/\/ assetPrefix/' $NEXT_CONFIG_FILE
+
+cp -r .dynamodb $DISTRIBUTION_FOLDER/
 
 cp serverless.yaml $DISTRIBUTION_FOLDER/
 cp serverless.dev.config.json $DISTRIBUTION_FOLDER/
